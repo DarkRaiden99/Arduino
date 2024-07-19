@@ -1,25 +1,14 @@
 
-//#define BLYNK_PRINT Serial
-#define BLYNK_TEMPLATE_ID "TMPL6PHEpRman"
-#define BLYNK_TEMPLATE_NAME "PowerMeter"
-#define BLYNK_AUTH_TOKEN "udE4Za_B1ZKxEhtOUYryvN8dzXeVsrus"
-
-
 #include <ESP8266WiFi.h>
-#include <BlynkSimpleEsp8266.h>
 #include <PZEM004Tv30.h>
 #include <SPI.h>
 #include <Wire.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
 
+//define buttons
 #define BTN D5
-
-
-char auth[] = BLYNK_AUTH_TOKEN;
-char ssid [] = "SLT_FIBRE";
-char pass [] = "rusith11";
-
+#define RST D6  //Reset button
 
 //OLED Display Settings
 #define SCREEN_WIDTH 128
@@ -122,9 +111,11 @@ float power=0;
 float energy=0;
 float frequency=0;
 float pf=0;
+
+
 unsigned long lastMillis = 0;
 
-//Triggers
+//Triggers and conditions
 int meter=0; //PZEM Connection
 int wifistat=0; //Wifi Connection
 int dswitch=0; //OLED Switch
@@ -155,15 +146,9 @@ void setup() {
   display.display();
   delay(3000);
   display.clearDisplay();
-
-  //Blynk Initialization
-  Blynk.begin(auth, ssid, pass, "blynk.cloud", 80);
 }
 
 void loop() {
-
-    Blynk.run();
-
     voltage = pzem.voltage();
     current = pzem.current();
     power = pzem.power();
@@ -242,18 +227,4 @@ void loop() {
     }
 
     delay(2000);
-  
-    delay(1000);
-
-      //Publish data every 5 seconds (5000 milliseconds). Change this value to publish at a different interval.
-          if (millis() - lastMillis > 5000) {
-            lastMillis = millis();
-            Blynk.virtualWrite(V1, voltage);
-            Blynk.virtualWrite(V2, current);            
-            Blynk.virtualWrite(V3, power);
-            Blynk.virtualWrite(V4, energy);
-            Blynk.virtualWrite(V5, frequency);
-            Blynk.virtualWrite(V6, pf);            
-            
-          }  
 }
