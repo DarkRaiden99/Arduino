@@ -7,7 +7,7 @@
 #include <Adafruit_SSD1306.h>
 
 //define buttons
-#define BTN D5
+#define BTN D5  //Main button
 #define RST D6  //Reset button
 
 //OLED Display Settings
@@ -88,12 +88,6 @@ const unsigned char boot [] PROGMEM = {
 	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
 };
 
-// Array of all bitmaps for convenience. (Total bytes used to store images in PROGMEM = 1040)
-/*const int bootallArray_LEN = 1;
-const unsigned char* bootallArray[1] = {
-	boot
-};*/
-
 const unsigned char wifi[] PROGMEM  ={
   0xe0, 0x18, 0x04, 0xc2, 0x22, 0x11, 0xc9, 0xc9
 };
@@ -112,20 +106,22 @@ float energy=0;
 float frequency=0;
 float pf=0;
 
+unsigned long meterMillis = 0;  //Meter timer
+unsigned long dispMillis = 0;   //Display Timer
 
-unsigned long lastMillis = 0;
-
-//Triggers and conditions
-int meter=0; //PZEM Connection
-int wifistat=0; //Wifi Connection
-int dswitch=0; //OLED Switch
-int dtimer=0; //OLED Timer
-int dstat=0; //OLED Status
+//Triggers and Conditions
+bool meter=0;     //PZEM Connection
+bool wifistat=0;  //Wifi Connection
+bool dstat=0;     //Display Status
+bool dswitch=0;   //Display Switch
+int dtimer=0;     //Display Timer
+int page=0;       //Display Pages
 
 void setup() {
   Serial.begin(9600);
 
   pinMode(BTN, INPUT);
+  pinMode(RST, INPUT);
   
   //OLED Display Inintialization
   if(!display.begin(SSD1306_SWITCHCAPVCC, SCREEN_ADDRESS)) {
@@ -144,7 +140,7 @@ void setup() {
   display.setTextColor(SSD1306_WHITE);
   display.setCursor(30,56); display.print("Initializing");
   display.display();
-  delay(3000);
+  delay(2000);
   display.clearDisplay();
 }
 
@@ -187,17 +183,11 @@ void loop() {
       display.clearDisplay();
 
       //Screen Top Bar
-      //bool result = Blynk.connected();
       display.setTextSize(1);
       display.setTextColor(SSD1306_WHITE);
-      display.setCursor(1,0);
+      display.setCursor(0,0);
       display.print("Power Meter");
-      //display.drawBitmap(108,0,ok,8,8,WHITE);
-      //if (result == true){
-        display.drawBitmap(120,0,wifi,8,8,WHITE);
-      /*} else {
-        display.drawBitmap(120,0,cross,8,8,WHITE);
-      }*/
+      display.drawBitmap(120,0,cross,8,8,WHITE);
       display.println();
       display.println();
       display.display();
