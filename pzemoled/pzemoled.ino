@@ -6,9 +6,12 @@
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
 
-//define buttons
-#define BTN D5  //Main button
-#define RST D6  //Reset button
+//Define Buttons
+#define BTN D5  //Main Button
+#define RST D6  //Reset Button
+
+//Define Relay
+#define RLY D7 //Main Relay
 
 //OLED Display Settings
 #define SCREEN_WIDTH 128
@@ -20,7 +23,7 @@ Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 PZEM004Tv30 pzem(&Serial); //PZEM Connection Pins
 
 //Bitmaps
-// 'boot', 128x64px
+// boot, 128x64
 const unsigned char boot [] PROGMEM = {
 	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
 	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
@@ -87,13 +90,15 @@ const unsigned char boot [] PROGMEM = {
 	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
 	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
 };
-
+//wifi, 8x8
 const unsigned char wifi[] PROGMEM  ={
   0xe0, 0x18, 0x04, 0xc2, 0x22, 0x11, 0xc9, 0xc9
 };
+//cross, 8x8
 const unsigned char cross[] PROGMEM  ={
   0x00, 0x42, 0x24, 0x10, 0x08, 0x24, 0x42, 0x00
 };
+//ok, 8x8
 /*const unsigned char ok[] PROGMEM  ={
   0x00, 0x01, 0x02, 0x04, 0x04, 0x48, 0x28, 0x10
 };*/
@@ -107,78 +112,53 @@ float frequency=0;
 float pf=0;
 
 unsigned long meterMillis = 0;  //Meter timer
-unsigned long dispMillis = 0;   //Display Timer
+unsigned long dispMillis = 0;   //Display Timeout Timer
+unsigned long disprMillis = 0;   //Display Refresh Timer
+unsigned long resetMillis = 0;   //Reset Countdown
 
 //Triggers and Conditions
 bool meter=0;     //PZEM Connection
 bool wifistat=0;  //Wifi Connection
-bool dstat=0;     //Display Status
+bool dstat=1;     //Display Status
 bool dswitch=0;   //Display Switch
-int dtimer=0;     //Display Timer
-int page=0;       //Display Pages
+bool dchange=0;   //Display Last State
+bool rswitch=0;   //Reset Switch
+bool rchange=0;   //Reset Last State
+//int dtimer=0;     //Display Timer
+int dpage=0;       //Display Pages
 
 void setup() {
   Serial.begin(9600);
 
   pinMode(BTN, INPUT);
   pinMode(RST, INPUT);
+  pinMode(RLY, OUTPUT);
   
-  //OLED Display Inintialization
-  if(!display.begin(SSD1306_SWITCHCAPVCC, SCREEN_ADDRESS)) {
-    Serial.println(F("SSD1306 allocation failed"));
-    for(;;); // Don't proceed, loop forever
-  }
+  oledboot(); //OLED Display initialization
 
-  //OLED GFX Library Initialization
-  display.display();
-  delay(10);
-  display.clearDisplay();
-
-  //Boot Screen
-  display.drawBitmap(0,0,boot,128,64,WHITE);
-  display.setTextSize(1);
-  display.setTextColor(SSD1306_WHITE);
-  display.setCursor(30,56); display.print("Initializing");
-  display.display();
+  bootscreen(); //Bootscreen
   delay(2000);
-  display.clearDisplay();
+
 }
 
 void loop() {
-    voltage = pzem.voltage();
-    current = pzem.current();
-    power = pzem.power();
-    energy = pzem.energy();
-    frequency = pzem.frequency();
-    pf = pzem.pf();
+  dswitch = digitalRead(BTN);
+  rswitch = digitalRead(RST);
 
-    //Checking PZEM Connection
-    if( !isnan(voltage) ){
-        meter = 1;
-    } else {
-        meter = 0;
-        voltage = 0;
-        current = 0;
-        power = 0;
-        energy = 0;
-        frequency = 0;
-        pf = 0;
-    }
+  resetbutton();
 
-    //OLED Timer and Swtich
-    dswitch = digitalRead(BTN);
-    if( dswitch == 1){
-      dtimer = 0;
-      dstat = 1;
-    } else {
-      if (dtimer == 5){
-        dstat = 0;
-      } else {
-        dstat = 1;
-        ++dtimer;
-      }
-    }
+  mainbutton();
 
+  meterreading();
+
+  disp();
+
+  delay(100);
+}
+
+void disp() {
+  if (millis() - disprMillis > 2000) {
+    disprMillis = millis();
     if (dstat == 1){
       display.clearDisplay();
 
@@ -192,22 +172,34 @@ void loop() {
       display.println();
       display.display();
 
-
       if(meter == 0){
         display.setTextSize(2);
         display.setCursor(38,16); display.println("Error");
         display.setCursor(27,32); display.println("Reading");
         display.setTextSize(1); display.setCursor(22,56); display.print("No Power Supply");
         display.display();
+
+        dchange = 0;
       } else {
-        display.setTextSize(1);
-        display.print("Voltage:   "); display.print(voltage,2); display.println(" V");
-        display.print("Current:   "); display.print(current,3); display.println(" A");
-        display.print("Power:     "); display.print(power,2); display.println(" W");
-        display.print("Usage:     "); display.print(energy,3); display.println(" kWh");
-        display.print("Freq.:     "); display.print(frequency,1); display.println(" Hz");
-        display.print("PF:        "); display.print(pf,2);
-        display.display();
+        if (dchange == 1) {
+          dchange = 0;
+          if(dpage == 2){
+            dpage = 0;
+          } else {
+            ++dpage;
+          }
+        }
+        switch (dpage) {
+          case 0:
+            disp1();
+            break;
+          case 1:
+            disp2();
+            break;
+          case 2:
+            disp3();
+            break;
+        }
       }
     } else {
       display.clearDisplay();
@@ -215,6 +207,117 @@ void loop() {
       display.print(" ");
       display.display();
     }
+  }
+}
 
-    delay(2000);
+void disp1 () {
+  display.println("");
+  display.setTextSize(2);
+  display.print(voltage,1);
+  display.println(" V");
+
+  display.setTextSize(1);
+  display.println("");
+
+  display.setTextSize(2);
+  display.print(current,3);
+  display.println(" A");
+  display.display();
+}
+
+void disp2 () {
+  display.println("");
+  display.setTextSize(2);
+  display.print(power,1);
+  display.println(" W");
+
+  display.setTextSize(1);
+  display.println("");
+
+  display.setTextSize(2);
+  display.print(energy,2);
+  display.println(" kWh");
+  display.display();
+}
+
+void disp3 () {
+  display.setTextSize(1);
+  display.print("Voltage:   "); display.print(voltage,2); display.println(" V");
+  display.print("Current:   "); display.print(current,3); display.println(" A");
+  display.print("Power:     "); display.print(power,2); display.println(" W");
+  display.print("Usage:     "); display.print(energy,3); display.println(" kWh");
+  display.print("Freq.:     "); display.print(frequency,1); display.println(" Hz");
+  display.print("PF:        "); display.print(pf,2);
+  display.display();
+}
+
+void mainbutton() {
+    if( dswitch == 1 && dchange == 0 && rchange == 0) {
+      if(dstat == 1) {
+        dchange = 1;
+      } else {
+        dstat = 1;
+        dchange = 0;
+        delay(500);
+      }
+      dispMillis = millis();
+  } else if(millis() - dispMillis > 60000) {
+    dstat = 0;
+  }
+}
+
+void resetbutton() {
+  if( rswitch == 1 && dswitch == 1) {
+    if(rchange == 0) {
+      rchange = 1;
+      resetMillis = millis();
+    } else if(millis() - resetMillis > 10000) {
+      pzem.resetEnergy();
+    }
+  } else {
+    rchange = 0;
+  }
+}
+
+void meterreading() {
+  if (millis() - meterMillis > 2000) {
+    meterMillis = millis();
+    voltage = pzem.voltage();
+    current = pzem.current();
+    power = pzem.power();
+    energy = pzem.energy();
+    frequency = pzem.frequency();
+    pf = pzem.pf();
+
+    if( !isnan(voltage) ){
+        meter = 1;
+    } else {
+        meter = 0;
+        voltage = 0;
+        current = 0;
+        power = 0;
+        energy = 0;
+        frequency = 0;
+        pf = 0;
+    }
+  }
+}
+
+void bootscreen() {
+  display.clearDisplay();
+  display.drawBitmap(0,0,boot,128,64,WHITE);
+  display.setTextSize(1);
+  display.setTextColor(SSD1306_WHITE);
+  display.setCursor(30,56); display.print("Initializing");
+  display.display();
+}
+
+void oledboot() {
+  if(!display.begin(SSD1306_SWITCHCAPVCC, SCREEN_ADDRESS)) {
+    Serial.println(F("SSD1306 allocation failed"));
+    for(;;); // Don't proceed, loop forever
+  }
+  display.display();
+  delay(10);
+  display.clearDisplay();
 }
