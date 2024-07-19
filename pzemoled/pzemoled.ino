@@ -261,7 +261,7 @@ void mainbutton() {
         delay(500);
       }
       dispMillis = millis();
-  } else if(millis() - dispMillis > 60000) {
+  } else if(millis() - dispMillis > 30000) {
     dstat = 0;
   }
 }
@@ -270,7 +270,9 @@ void resetbutton() {
   if( rswitch == 1 && dswitch == 1) {
     if(rchange == 0) {
       rchange = 1;
+      dstat = 1;
       resetMillis = millis();
+      dispMillis = millis();
     } else if(millis() - resetMillis > 10000) {
       pzem.resetEnergy();
     }
