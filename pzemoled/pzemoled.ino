@@ -264,7 +264,7 @@ void relay() {
     relayMillis = millis();
   }
 
-  if (schange == 1 && millis() - relayMillis > 60000) {
+  if (schange == 1 && millis() - relayMillis < 60000) {
     sswitch = 1;
   } else {
     schange = 0;
