@@ -256,10 +256,10 @@ void disp3 () {
 }
 
 void relay() {
-  if(voltage > 260 || voltage < 210) {
+  if(voltage > 260 || (voltage < 210 && voltage > 0)) {
     schange = 1;
     relayMillis = millis();
-  } else if (frequency > 53 || frequency < 47) {
+  } else if (frequency > 53 || (frequency < 47 && frequency > 0)) {
     schange = 1;
     relayMillis = millis();
   }
@@ -272,9 +272,9 @@ void relay() {
   }
 
   if (sswitch == 1) {
-    digitalWrite(RLY, LOW);
-  } else {
     digitalWrite(RLY, HIGH);
+  } else {
+    digitalWrite(RLY, LOW);
   }
 }
 
