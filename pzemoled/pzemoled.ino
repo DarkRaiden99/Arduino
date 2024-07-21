@@ -115,6 +115,7 @@ unsigned long meterMillis = 0;  //Meter timer
 unsigned long dispMillis = 0;   //Display Timeout Timer
 unsigned long disprMillis = 0;   //Display Refresh Timer
 unsigned long resetMillis = 0;   //Reset Countdown
+unsigned long relayMillis = 0;   //Relay Timer
 
 //Triggers and Conditions
 bool meter=0;     //PZEM Connection
@@ -124,7 +125,8 @@ bool dswitch=0;   //Display Switch
 bool dchange=0;   //Display Last State
 bool rswitch=0;   //Reset Switch
 bool rchange=0;   //Reset Last State
-//int dtimer=0;     //Display Timer
+bool sswitch=0;   //Relay Trigger
+bool schange=0;   //Relay Last State
 int dpage=0;       //Display Pages
 
 void setup() {
@@ -150,6 +152,8 @@ void loop() {
   mainbutton();
 
   meterreading();
+
+  relay();
 
   disp();
 
@@ -249,6 +253,29 @@ void disp3 () {
   display.print("Freq.:     "); display.print(frequency,1); display.println(" Hz");
   display.print("PF:        "); display.print(pf,2);
   display.display();
+}
+
+void relay() {
+  if(voltage > 260 || voltage < 210) {
+    schange = 1;
+    relayMillis = millis();
+  } else if (frequency > 55 || frequency < 45) {
+    schange = 1;
+    relayMillis = millis();
+  }
+
+  if (schange == 1 && millis() - relayMillis > 60000) {
+    sswitch = 1;
+  } else {
+    schange = 0;
+    sswitch = 0;
+  }
+
+  if (sswitch == 1) {
+    digitalWrite(RLY, HIGH);
+  } else {
+    digitalWrite(RLY, LOW);
+  }
 }
 
 void mainbutton() {
