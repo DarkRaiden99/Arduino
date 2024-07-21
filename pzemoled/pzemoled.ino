@@ -259,7 +259,7 @@ void relay() {
   if(voltage > 260 || voltage < 210) {
     schange = 1;
     relayMillis = millis();
-  } else if (frequency > 55 || frequency < 45) {
+  } else if (frequency > 53 || frequency < 47) {
     schange = 1;
     relayMillis = millis();
   }
@@ -272,9 +272,9 @@ void relay() {
   }
 
   if (sswitch == 1) {
-    digitalWrite(RLY, HIGH);
-  } else {
     digitalWrite(RLY, LOW);
+  } else {
+    digitalWrite(RLY, HIGH);
   }
 }
 
