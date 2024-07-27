@@ -114,6 +114,7 @@ unsigned long dispMillis = 0;   //Display Timeout Timer
 unsigned long disprMillis = 0;  //Display Refresh Timer
 unsigned long resetMillis = 0;  //Reset Countdown
 unsigned long relayMillis = 0;  //Relay Timer
+unsigned long usageMillis = 0;  //Usage Timer
 
 //Triggers and Conditions
 bool meter=0;     //PZEM Connection
@@ -125,20 +126,29 @@ bool rswitch=0;   //Reset Switch
 bool rchange=0;   //Reset Last State
 bool sswitch=0;   //Relay Trigger
 bool schange=0;   //Relay Last State
-int dpage=3;      //Display Pages
 
 //Timers and Threshholds (in Milliseconds)
-int screentimeout = 30000;  //Screen Timeout
+int screentimeout = 300000;  //Screen Timeout
 int resettimer = 10000;     //Screen Reset Timer
 int relaytimer = 60000;     //Relay Reset Time
 int meterrefresh = 2000;    //Meter Reading Refresh Time
 int screenrefresh = 1000;   //Screen Refresh Time
+int usagerefresh = 10000;  //Usage Refresh Time (2mins)
 
 int voltHigh = 260; //Voltage High Limit
 int voltLow = 200;  //Voltage Low Limit
 int freqHigh = 53;  //Frequency High Limit
 int freqLow = 47;   //Frequency Low Limit
-int pageCount = 3;  //Page Count
+int pageCount = 4;  //Page Count
+
+//Memory
+int dpage=1;            //Display Page Memory
+float hourly [30] = {};   //Hourly Usage Memory Array
+float daily [24] = {};    //Daily Usage Memory Array
+int huse=0;             //Hourly Usage
+int duse=0;             //Daily Usage
+int huse2;
+int duse2;
 
 void setup() {
   Serial.begin(9600);
@@ -164,6 +174,8 @@ void loop() {
 
   meterreading();
 
+  usagememory();
+
   relay();
 
   disp();
@@ -183,7 +195,6 @@ void disp() {
       display.setCursor(0,0);
       display.print("Power Meter");
       display.drawBitmap(120,0,cross,8,8,WHITE);
-      display.println();
       display.println();
       display.display();
 
@@ -206,13 +217,16 @@ void disp() {
         }
         switch (dpage) {
           case 1:
-            disp1();
+            disp3();
             break;
           case 2:
-            disp2();
+            disp1();
             break;
           case 3:
-            disp3();
+            disp2();
+            break;
+          case 4:
+            disp4();
             break;
         }
       }
@@ -250,13 +264,14 @@ void disp2 () {
   display.println("");
 
   display.setTextSize(2);
-  display.print(energy,2);
+  display.print(energy,3);
   display.println(" kWh");
   display.display();
 }
 
 void disp3 () {
   display.setTextSize(1);
+  display.println("");
   display.print("Voltage:   "); display.print(voltage,2); display.println(" V");
   display.print("Current:   "); display.print(current,3); display.println(" A");
   display.print("Power:     "); display.print(power,2); display.println(" W");
@@ -266,11 +281,32 @@ void disp3 () {
   display.display();
 }
 
+void disp4 () {
+  display.setTextSize(1);
+  display.print(huse);
+  display.print(" ");
+  display.println(huse2);
+
+  display.setTextSize(2);
+  display.print(hourly[huse],3);
+  display.println(" kwh");
+
+  display.setTextSize(1);
+  display.print(duse);
+  display.print(" ");
+  display.println(duse2);
+
+  display.setTextSize(2);
+  display.print(daily[duse],3);
+  display.println(" kWh");
+  display.display();
+}
+
 void relay() {
   if(voltage > voltHigh || (voltage < voltLow && voltage > 0)) {
     schange = 1;
     relayMillis = millis();
-  } else if (frequency > frqHigh || (frequency < freqLow && frequency > 0)) {
+  } else if (frequency > freqHigh || (frequency < freqLow && frequency > 0)) {
     schange = 1;
     relayMillis = millis();
   }
@@ -323,22 +359,56 @@ void meterreading() {
   if (millis() - meterMillis > meterrefresh) {
     meterMillis = millis();
     voltage = pzem.voltage();
-    current = pzem.current();
-    power = pzem.power();
-    energy = pzem.energy();
-    frequency = pzem.frequency();
-    pf = pzem.pf();
 
     if( !isnan(voltage) ){
         meter = 1;
+        current = pzem.current();
+        power = pzem.power();
+        energy = pzem.energy();
+        frequency = pzem.frequency();
+        pf = pzem.pf();
     } else {
         meter = 0;
         voltage = 0;
         current = 0;
         power = 0;
-        energy = 0;
         frequency = 0;
         pf = 0;
+    }
+  }
+}
+
+void usagememory() {
+  if(millis() - usageMillis > usagerefresh) {
+    usageMillis = millis();
+    if(huse == 0) {
+      ++huse;
+      hourly[huse] = energy - hourly[1];
+    } else if (huse > 0 && huse < 29) {
+      ++huse;
+      huse2 = huse + 1;
+      hourly[huse] = energy - hourly[huse2];
+    } else if (huse == 29) {
+      huse = 0;
+      hourly[huse] = energy - hourly[0];
+    }
+    if(duse == 0) {
+      if(huse == 29) {
+        ++duse;
+      }
+      daily[duse] = energy - daily[1];
+    } else if (duse > 0 && duse < 23) {
+      if (huse == 29) {
+        ++duse;
+      }
+      duse2 = duse + 1;
+      daily[duse] = energy - daily[duse2];
+    } else if (duse == 23) {
+      if(huse == 29) {
+        duse = 0;
+      }
+      daily[duse] = energy - daily[0];
+      
     }
   }
 }
