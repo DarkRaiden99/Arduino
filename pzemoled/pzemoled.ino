@@ -6,12 +6,10 @@
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
 
-//Define Buttons
+//Define Buttons & Relay
 #define BTN D5  //Main Button
 #define RST D6  //Reset Button
-
-//Define Relay
-#define RLY D7 //Main Relay
+#define RLY D7  //Main Relay
 
 //OLED Display Settings
 #define SCREEN_WIDTH 128
@@ -113,9 +111,9 @@ float pf=0;
 
 unsigned long meterMillis = 0;  //Meter timer
 unsigned long dispMillis = 0;   //Display Timeout Timer
-unsigned long disprMillis = 0;   //Display Refresh Timer
-unsigned long resetMillis = 0;   //Reset Countdown
-unsigned long relayMillis = 0;   //Relay Timer
+unsigned long disprMillis = 0;  //Display Refresh Timer
+unsigned long resetMillis = 0;  //Reset Countdown
+unsigned long relayMillis = 0;  //Relay Timer
 
 //Triggers and Conditions
 bool meter=0;     //PZEM Connection
@@ -127,7 +125,20 @@ bool rswitch=0;   //Reset Switch
 bool rchange=0;   //Reset Last State
 bool sswitch=0;   //Relay Trigger
 bool schange=0;   //Relay Last State
-int dpage=0;       //Display Pages
+int dpage=3;      //Display Pages
+
+//Timers and Threshholds (in Milliseconds)
+int screentimeout = 30000;  //Screen Timeout
+int resettimer = 10000;     //Screen Reset Timer
+int relaytimer = 60000;     //Relay Reset Time
+int meterrefresh = 2000;    //Meter Reading Refresh Time
+int screenrefresh = 1000;   //Screen Refresh Time
+
+int voltHigh = 260; //Voltage High Limit
+int voltLow = 200;  //Voltage Low Limit
+int freqHigh = 53;  //Frequency High Limit
+int freqLow = 47;   //Frequency Low Limit
+int pageCount = 3;  //Page Count
 
 void setup() {
   Serial.begin(9600);
@@ -136,7 +147,7 @@ void setup() {
   pinMode(RST, INPUT);
   pinMode(RLY, OUTPUT);
   
-  oledboot(); //OLED Display initialization
+  oledboot();   //OLED Display initialization
 
   bootscreen(); //Bootscreen
   delay(2000);
@@ -161,7 +172,7 @@ void loop() {
 }
 
 void disp() {
-  if (millis() - disprMillis > 2000) {
+  if (millis() - disprMillis > screenrefresh) {
     disprMillis = millis();
     if (dstat == 1){
       display.clearDisplay();
@@ -187,20 +198,20 @@ void disp() {
       } else {
         if (dchange == 1) {
           dchange = 0;
-          if(dpage == 2){
-            dpage = 0;
+          if(dpage == pageCount){
+            dpage = 1;
           } else {
             ++dpage;
           }
         }
         switch (dpage) {
-          case 0:
+          case 1:
             disp1();
             break;
-          case 1:
+          case 2:
             disp2();
             break;
-          case 2:
+          case 3:
             disp3();
             break;
         }
@@ -256,15 +267,15 @@ void disp3 () {
 }
 
 void relay() {
-  if(voltage > 260 || (voltage < 210 && voltage > 0)) {
+  if(voltage > voltHigh || (voltage < voltLow && voltage > 0)) {
     schange = 1;
     relayMillis = millis();
-  } else if (frequency > 53 || (frequency < 47 && frequency > 0)) {
+  } else if (frequency > frqHigh || (frequency < freqLow && frequency > 0)) {
     schange = 1;
     relayMillis = millis();
   }
 
-  if (schange == 1 && millis() - relayMillis < 60000) {
+  if (schange == 1 && millis() - relayMillis < relaytimer) {
     sswitch = 1;
   } else {
     schange = 0;
@@ -288,7 +299,7 @@ void mainbutton() {
         delay(500);
       }
       dispMillis = millis();
-  } else if(millis() - dispMillis > 30000) {
+  } else if(millis() - dispMillis > screentimeout) {
     dstat = 0;
   }
 }
@@ -300,7 +311,7 @@ void resetbutton() {
       dstat = 1;
       resetMillis = millis();
       dispMillis = millis();
-    } else if(millis() - resetMillis > 10000) {
+    } else if(millis() - resetMillis > resettimer) {
       pzem.resetEnergy();
     }
   } else {
@@ -309,7 +320,7 @@ void resetbutton() {
 }
 
 void meterreading() {
-  if (millis() - meterMillis > 2000) {
+  if (millis() - meterMillis > meterrefresh) {
     meterMillis = millis();
     voltage = pzem.voltage();
     current = pzem.current();
