@@ -423,13 +423,14 @@ void usagememory() {
     if(d1 > 23) {
       d1 = 0;
     }
-    if(d2 == 0 && d1 < 23) {
-      d12 = d1 + 1;
+    if(d2 == 0 && d1 == 0) {
+      daily = hourly;
+    } else if (d2 == 0 && d1 > 0 && d1 < 23) {
       dAry[d1] = energy;
-      daily = dAry[0] - dAry[d12];
+      daily = dAry[d1] - dAry[0];
     } else if (d2 == 0 && d1 == 23) {
-      dAry[0] = energy;
-      daily = dAry[0] - dAry[1];
+      dAry[23] = energy;
+      daily = dAry[23] - dAry[0];
       if (h1 == 59) {
         d2 = 1;
       }
