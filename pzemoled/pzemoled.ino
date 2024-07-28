@@ -136,7 +136,7 @@ int resettimer = 10000;     //Screen Reset Timer
 int relaytimer = 60000;     //Relay Reset Time
 int meterrefresh = 2000;    //Meter Reading Refresh Time
 int screenrefresh = 1000;   //Screen Refresh Time
-int usagerefresh = 120000;  //Usage Refresh Time (2mins)
+int usagerefresh = 60000;  //Usage Refresh Time (2mins)
 
 int voltHigh = 260; //Voltage High Limit
 int voltLow = 200;  //Voltage Low Limit
@@ -145,15 +145,20 @@ int freqLow = 47;   //Frequency Low Limit
 int pageCount = 4;  //Page Count
 
 //Memory
-int dpage = 1;             //Display Page Memory
-float hourly [30] = {};   //Hourly Usage Memory Array
-float hourlyin = 0;       //Hourly Initial Memory
-float daily [24] = {};    //Daily Usage Memory Array
-float dailyin = 0;        //Daily Initial Memory
-int huse = 0;             //Hourly Usage Memories
-int huse2;
-int duse = 0;             //Daily Usage Memories
-int duse2;
+int dpage = 1;          //Display Page Memory
+float hAry [60] = {};   //Hourly Usage Memory Array
+float hIn = 0;          //Hourly Initial Memory
+float hourly = 0;
+float dAry [24] = {};   //Daily Usage Memory Array
+float dIn = 0;          //Daily Initial Memory
+float daily = 0;
+int h1 = 0;           //Hourly Usage Memories
+bool h2 = 0;
+int h12 = 0;
+int h13 = 0;
+int d1 = 0;           //Daily Usage Memories
+bool d2 = 0;
+int d12= 0;
 
 void setup() {
   Serial.begin(9600);
@@ -293,11 +298,11 @@ void disp4 () {
   display.println();
 
   display.print("Hourly:  ");
-  display.print(hourly[huse],3);
+  display.print(hourly,3);
   display.println(" kwh");
 
   display.print("Daily:   ");
-  display.print(daily[duse],3);
+  display.print(daily,3);
   display.println(" kWh");
 
   display.println();
@@ -385,6 +390,63 @@ void meterreading() {
 
 void usagememory() {
   if(use == 0) {
+    hAry[0] = energy;
+    dAry[0] = energy;
+    use = 1;
+  }
+
+  if(millis() - usageMillis > usagerefresh) {
+    usageMillis = millis();
+    if (h2 == 0 && h1 < 59) {
+      ++h1;
+      hAry[h1] = energy;
+      hourly = hAry[h1] - hAry[0];
+    } else if (h2 == 0 && h1 == 59) {
+      h1 = 0;
+      ++d1;
+      hAry[0] = energy;
+      hourly = hAry[0] - hAry[1];
+      h2 = 1;
+    } else {
+      if(h1 < 59) {
+        ++h1;
+        h12 = h1 + 1;
+        hAry[h1] = energy;
+        hourly = hAry[h1] - hAry[h12];
+      } else if (h1 == 59) {
+        h1 = 0;
+        ++d1;
+        hAry[0] = energy;
+        hourly = hAry[0] - hAry[1];
+      }
+    }
+    if(d1 > 23) {
+      d1 = 0;
+    }
+    if(d2 == 0 && d1 < 23) {
+      d12 = d1 + 1;
+      dAry[d1] = energy;
+      daily = dAry[0] - dAry[d12];
+    } else if (d2 == 0 && d1 == 23) {
+      dAry[0] = energy;
+      daily = dAry[0] - dAry[1];
+      if (h1 == 59) {
+        d2 = 1;
+      }
+    } else {
+      if(d1 < 23) {
+        d12 = d1 + 1;
+        dAry[d1] = energy;
+        daily = dAry[d1] - dAry[d12];
+      } else if (d1 == 23) {
+        dAry[d1] = energy;
+        daily = dAry[d1] - dAry[0];
+      }
+    }
+  }
+}
+/*void usagememory1() {
+  if(use == 0) {
     hourlyin = energy;
     dailyin = energy;
     use = 1;
@@ -397,7 +459,7 @@ void usagememory() {
       hourly[huse] = energy - hourly[0];
     } else if (huse3 == 0 && huse == 29) {
       huse = 0;
-      hourly[huse] = energy - hourly[1];
+      hourly[huse] = energy - hourlyin;
       huse3 = 1;
     } else {
       if(huse == 0) {
@@ -424,7 +486,7 @@ void usagememory() {
         if (huse == 29) {
           duse = 0;
         }
-        daily[duse] = energy - daily[0];
+        daily[duse] = energy - dailyin;
         duse3 = 1;
       }
     } else {
@@ -447,7 +509,7 @@ void usagememory() {
       }
     }
   }
-}
+}*/
 
 void bootscreen() {
   display.clearDisplay();
