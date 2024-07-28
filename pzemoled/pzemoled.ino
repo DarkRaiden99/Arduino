@@ -117,23 +117,26 @@ unsigned long relayMillis = 0;  //Relay Timer
 unsigned long usageMillis = 0;  //Usage Timer
 
 //Triggers and Conditions
-bool meter=0;     //PZEM Connection
-bool wifistat=0;  //Wifi Connection
-bool dstat=1;     //Display Status
-bool dswitch=0;   //Display Switch
-bool dchange=0;   //Display Last State
-bool rswitch=0;   //Reset Switch
-bool rchange=0;   //Reset Last State
-bool sswitch=0;   //Relay Trigger
-bool schange=0;   //Relay Last State
+bool meter = 0;     //PZEM Connection
+bool wifistat = 0;  //Wifi Connection
+bool dstat = 1;     //Display Status
+bool dswitch = 0;   //Display Switch
+bool dchange = 0;   //Display Last State
+bool rswitch = 0;   //Reset Switch
+bool rchange = 0;   //Reset Last State
+bool sswitch = 0;   //Relay Trigger
+bool schange = 0;   //Relay Last State
+bool use = 0;       //Usage Last State
+bool huse3 = 0;     //Hourly Usage Last State
+bool duse3 = 0;
 
 //Timers and Threshholds (in Milliseconds)
-int screentimeout = 300000;  //Screen Timeout
+int screentimeout = 30000;  //Screen Timeout
 int resettimer = 10000;     //Screen Reset Timer
 int relaytimer = 60000;     //Relay Reset Time
 int meterrefresh = 2000;    //Meter Reading Refresh Time
 int screenrefresh = 1000;   //Screen Refresh Time
-int usagerefresh = 10000;  //Usage Refresh Time (2mins)
+int usagerefresh = 120000;  //Usage Refresh Time (2mins)
 
 int voltHigh = 260; //Voltage High Limit
 int voltLow = 200;  //Voltage Low Limit
@@ -142,12 +145,14 @@ int freqLow = 47;   //Frequency Low Limit
 int pageCount = 4;  //Page Count
 
 //Memory
-int dpage=1;            //Display Page Memory
+int dpage = 1;             //Display Page Memory
 float hourly [30] = {};   //Hourly Usage Memory Array
+float hourlyin = 0;       //Hourly Initial Memory
 float daily [24] = {};    //Daily Usage Memory Array
-int huse=0;             //Hourly Usage
-int duse=0;             //Daily Usage
+float dailyin = 0;        //Daily Initial Memory
+int huse = 0;             //Hourly Usage Memories
 int huse2;
+int duse = 0;             //Daily Usage Memories
 int duse2;
 
 void setup() {
@@ -283,21 +288,21 @@ void disp3 () {
 
 void disp4 () {
   display.setTextSize(1);
-  display.print(huse);
-  display.print(" ");
-  display.println(huse2);
+  display.println();
+  display.println("Energy Consumption");
+  display.println();
 
-  display.setTextSize(2);
+  display.print("Hourly:  ");
   display.print(hourly[huse],3);
   display.println(" kwh");
 
-  display.setTextSize(1);
-  display.print(duse);
-  display.print(" ");
-  display.println(duse2);
-
-  display.setTextSize(2);
+  display.print("Daily:   ");
   display.print(daily[duse],3);
+  display.println(" kWh");
+
+  display.println();
+  display.print("Total:   ");
+  display.print(energy,3);
   display.println(" kWh");
   display.display();
 }
@@ -379,36 +384,67 @@ void meterreading() {
 }
 
 void usagememory() {
+  if(use == 0) {
+    hourlyin = energy;
+    dailyin = energy;
+    use = 1;
+  }
   if(millis() - usageMillis > usagerefresh) {
     usageMillis = millis();
-    if(huse == 0) {
+    if(huse3 == 0 && huse < 29) {
       ++huse;
-      hourly[huse] = energy - hourly[1];
-    } else if (huse > 0 && huse < 29) {
-      ++huse;
-      huse2 = huse + 1;
-      hourly[huse] = energy - hourly[huse2];
-    } else if (huse == 29) {
-      huse = 0;
+      hourly[0] = hourlyin;
       hourly[huse] = energy - hourly[0];
+    } else if (huse3 == 0 && huse == 29) {
+      huse = 0;
+      hourly[huse] = energy - hourly[1];
+      huse3 = 1;
+    } else {
+      if(huse == 0) {
+        ++huse;
+        hourly[huse] = energy - hourly[2];
+      } else if (huse > 0 && huse < 29) {
+        ++huse;
+        huse2 = huse + 1;
+        hourly[huse] = energy - hourly[huse2];
+      } else if (huse == 29) {
+        huse = 0;
+        hourly[huse] = energy - hourly[0];
     }
-    if(duse == 0) {
-      if(huse == 29) {
-        ++duse;
+
+    }
+    if(duse3 == 0 && duse < 23) {
+      if (duse3 == 0 && duse < 23) {
+        if (huse == 29) {
+          ++duse;
+        }
+        daily[0] = dailyin;
+        daily[duse] = energy - daily[0];
+      } else if (duse3 == 0 && duse == 23) {
+        if (huse == 29) {
+          duse = 0;
+        }
+        daily[duse] = energy - daily[0];
+        duse3 = 1;
       }
-      daily[duse] = energy - daily[1];
-    } else if (duse > 0 && duse < 23) {
-      if (huse == 29) {
-        ++duse;
+    } else {
+      if(duse == 0) {
+        if(huse == 29) {
+          ++duse;
+        }
+        daily[duse] = energy - daily[1];
+      } else if (duse > 0 && duse < 23) {
+        if (huse == 29) {
+          ++duse;
+        }
+        duse2 = duse + 1;
+        daily[duse] = energy - daily[duse2];
+      } else if (duse == 23) {
+        if(huse == 29) {
+          duse = 0;
+        }
+        daily[duse] = energy - daily[0];
       }
-      duse2 = duse + 1;
-      daily[duse] = energy - daily[duse2];
-    } else if (duse == 23) {
-      if(huse == 29) {
-        duse = 0;
-      }
-      daily[duse] = energy - daily[0];
-      
     }
   }
 }
