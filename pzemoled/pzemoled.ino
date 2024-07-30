@@ -334,15 +334,15 @@ void relay() {
 }
 
 void mainbutton() {
-    if( dswitch == 1 && dchange == 0 && rchange == 0) {
-      if(dstat == 1) {
-        dchange = 1;
-      } else {
-        dstat = 1;
-        dchange = 0;
-        delay(500);
-      }
-      dispMillis = millis();
+  if( dswitch == 1 && dchange == 0 && rchange == 0) {
+    if(dstat == 1) {
+      dchange = 1;
+    } else {
+      dstat = 1;
+      dchange = 0;
+      delay(500);
+    }
+    dispMillis = millis();
   } else if(millis() - dispMillis > screentimeout) {
     dstat = 0;
   }
