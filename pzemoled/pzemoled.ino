@@ -101,7 +101,7 @@ const unsigned char cross[] PROGMEM  ={
   0x00, 0x01, 0x02, 0x04, 0x04, 0x48, 0x28, 0x10
 };*/
 
-//Variables
+//PZEM Variables
 float voltage=0;
 float current=0;
 float power=0;
@@ -109,7 +109,8 @@ float energy=0;
 float frequency=0;
 float pf=0;
 
-unsigned long meterMillis = 0;  //Meter timer
+//Timer Memories
+unsigned long meterMillis = 0;  //Meter Timer
 unsigned long dispMillis = 0;   //Display Timeout Timer
 unsigned long disprMillis = 0;  //Display Refresh Timer
 unsigned long resetMillis = 0;  //Reset Countdown
@@ -127,8 +128,21 @@ bool rchange = 0;   //Reset Last State
 bool sswitch = 0;   //Relay Trigger
 bool schange = 0;   //Relay Last State
 bool use = 0;       //Usage Last State
-bool huse3 = 0;     //Hourly Usage Last State
-bool duse3 = 0;
+bool h2 = 0;        //Hourly Usage Last State
+bool d2 = 0;        //Daily Usage Last State
+
+//Other Memories
+int dpage = 1;          //Display Page Memory
+float hAry [60] = {};   //Hourly Usage Memory Array
+float hIn = 0;          //Hourly Initial Memory
+float hourly = 0;       //Hourly Usage
+float dAry [24] = {};   //Daily Usage Memory Array
+float dIn = 0;          //Daily Initial Memory
+float daily = 0;        //Daily Usage
+int h1 = 0;             //H_Usage Array Location1
+int h12 = 0;            //H_Usage Array Location2
+int d1 = 0;             //D_Usage Array Location1
+int d12= 0;             //D_Usage Array Location2
 
 //Timers and Threshholds (in Milliseconds)
 int screentimeout = 30000;  //Screen Timeout
@@ -143,22 +157,6 @@ int voltLow = 200;  //Voltage Low Limit
 int freqHigh = 53;  //Frequency High Limit
 int freqLow = 47;   //Frequency Low Limit
 int pageCount = 4;  //Page Count
-
-//Memory
-int dpage = 1;          //Display Page Memory
-float hAry [60] = {};   //Hourly Usage Memory Array
-float hIn = 0;          //Hourly Initial Memory
-float hourly = 0;
-float dAry [24] = {};   //Daily Usage Memory Array
-float dIn = 0;          //Daily Initial Memory
-float daily = 0;
-int h1 = 0;           //Hourly Usage Memories
-bool h2 = 0;
-int h12 = 0;
-int h13 = 0;
-int d1 = 0;           //Daily Usage Memories
-bool d2 = 0;
-int d12= 0;
 
 void setup() {
   Serial.begin(9600);
@@ -371,31 +369,33 @@ void meterreading() {
     voltage = pzem.voltage();
 
     if( !isnan(voltage) ){
-        meter = 1;
-        current = pzem.current();
-        power = pzem.power();
-        energy = pzem.energy();
-        frequency = pzem.frequency();
-        pf = pzem.pf();
+      if(use == 0) {
+        hAry[0] = energy;
+        dAry[0] = energy;
+        use = 1;
+      }
+      meter = 1;
+      current = pzem.current();
+      power = pzem.power();
+      energy = pzem.energy();
+      frequency = pzem.frequency();
+      pf = pzem.pf();
     } else {
-        meter = 0;
-        voltage = 0;
-        current = 0;
-        power = 0;
-        frequency = 0;
-        pf = 0;
+      meter = 0;
+      voltage = 0;
+      current = 0;
+      power = 0;
+      frequency = 0;
+      pf = 0;
     }
   }
 }
 
 void usagememory() {
-  if(use == 0) {
-    hAry[0] = energy;
-    dAry[0] = energy;
-    use = 1;
+  if (use == 0) {
+    usageMillis = millis();
   }
-
-  if(millis() - usageMillis > usagerefresh) {
+  if(millis() - usageMillis > usagerefresh && use == 1) {
     usageMillis = millis();
     if (h2 == 0 && h1 < 59) {
       ++h1;
@@ -446,71 +446,6 @@ void usagememory() {
     }
   }
 }
-/*void usagememory1() {
-  if(use == 0) {
-    hourlyin = energy;
-    dailyin = energy;
-    use = 1;
-  }
-  if(millis() - usageMillis > usagerefresh) {
-    usageMillis = millis();
-    if(huse3 == 0 && huse < 29) {
-      ++huse;
-      hourly[0] = hourlyin;
-      hourly[huse] = energy - hourly[0];
-    } else if (huse3 == 0 && huse == 29) {
-      huse = 0;
-      hourly[huse] = energy - hourlyin;
-      huse3 = 1;
-    } else {
-      if(huse == 0) {
-        ++huse;
-        hourly[huse] = energy - hourly[2];
-      } else if (huse > 0 && huse < 29) {
-        ++huse;
-        huse2 = huse + 1;
-        hourly[huse] = energy - hourly[huse2];
-      } else if (huse == 29) {
-        huse = 0;
-        hourly[huse] = energy - hourly[0];
-    }
-
-    }
-    if(duse3 == 0 && duse < 23) {
-      if (duse3 == 0 && duse < 23) {
-        if (huse == 29) {
-          ++duse;
-        }
-        daily[0] = dailyin;
-        daily[duse] = energy - daily[0];
-      } else if (duse3 == 0 && duse == 23) {
-        if (huse == 29) {
-          duse = 0;
-        }
-        daily[duse] = energy - dailyin;
-        duse3 = 1;
-      }
-    } else {
-      if(duse == 0) {
-        if(huse == 29) {
-          ++duse;
-        }
-        daily[duse] = energy - daily[1];
-      } else if (duse > 0 && duse < 23) {
-        if (huse == 29) {
-          ++duse;
-        }
-        duse2 = duse + 1;
-        daily[duse] = energy - daily[duse2];
-      } else if (duse == 23) {
-        if(huse == 29) {
-          duse = 0;
-        }
-        daily[duse] = energy - daily[0];
-      }
-    }
-  }
-}*/
 
 void bootscreen() {
   display.clearDisplay();
