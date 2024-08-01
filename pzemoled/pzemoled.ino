@@ -145,11 +145,11 @@ int d1 = 0;             //D_Usage Array Location1
 int d12= 0;             //D_Usage Array Location2
 
 //Timers and Threshholds (in Milliseconds)
-int screentimeout = 30000;  //Screen Timeout
-int resettimer = 10000;     //Screen Reset Timer
-int relaytimer = 60000;     //Relay Reset Time
-int meterrefresh = 2000;    //Meter Reading Refresh Time
-int screenrefresh = 1000;   //Screen Refresh Time
+int screentimeout = 30000; //Screen Timeout
+int resettimer = 10000;    //Screen Reset Timer
+int relaytimer = 60000;    //Relay Reset Time
+int meterrefresh = 2000;   //Meter Reading Refresh Time
+int screenrefresh = 1000;  //Screen Refresh Time
 int usagerefresh = 60000;  //Usage Refresh Time (2mins)
 
 int voltHigh = 260; //Voltage High Limit
