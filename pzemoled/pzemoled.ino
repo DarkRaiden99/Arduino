@@ -132,7 +132,7 @@ bool h2 = 0;        //Hourly Usage Last State
 bool d2 = 0;        //Daily Usage Last State
 
 //Other Memories
-int dpage = 1;          //Display Page Memory
+int dpage = 0;          //Display Page Memory
 float hAry [60] = {};   //Hourly Usage Memory Array
 float hIn = 0;          //Hourly Initial Memory
 float hourly = 0;       //Hourly Usage
@@ -142,7 +142,7 @@ float daily = 0;        //Daily Usage
 int h1 = 0;             //H_Usage Array Location1
 int h12 = 0;            //H_Usage Array Location2
 int d1 = 0;             //D_Usage Array Location1
-int d12= 0;             //D_Usage Array Location2
+int d12 = 0;            //D_Usage Array Location2
 
 //Timers and Threshholds (in Milliseconds)
 int screentimeout = 30000; //Screen Timeout
