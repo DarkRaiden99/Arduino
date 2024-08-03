@@ -23,44 +23,221 @@ float pf = 0.96;
 float daily = 2;
 float hourly = 0.2;
 
-unsigned long dispMillis = 0;   //Display Timeout Timer
-unsigned long disprMillis = 0;  //Display Refresh Timer
+unsigned long dispMillis = 0;     //Display Timeout Timer
+unsigned long disprMillis = 0;    //Display Refresh Timer
+unsigned long settingMillis = 0;  //Setting Hold Timer
 
 bool meter = 0;     //PZEM Connection
 bool wifistat = 0;  //Wifi Connection
-bool switch1 = 0;   //Left Button
-bool switch2 = 0;   //Right Button
+bool s1 = 0;        //Left Button
+bool s1last = 0;    //Left Button Last State
+bool s2 = 0;        //Right Button
+bool s2last = 0;    //Right Button Last State
 bool dstat = 1;     //Display Status
+bool dchange = 0;   //Display Force Refresh
+bool dl = 0;        //Display Left Action
+bool dr = 0;        //Display Right Action
 
 
 int screenrefresh = 2000;  //Screen Refresh Time
+int settingHold = 5000;    //Settings Hold Time
 
-int dmemory [2] = {};
+int dmemory [4] = {};      //Display Memory Array
 
 void setup() {
   Serial.begin(9600);
+
+  pinMode(BTN1, INPUT);
+  pinMode(BTN2, INPUT);
+
   display.begin(SSD1306_SWITCHCAPVCC, SCREEN_ADDRESS);
   display.clearDisplay();
 }
 
 void loop() {
-  switch1 = digitalRead(BTN1);
-  switch2 = digitalRead(BTN2);
+  s1 = digitalRead(BTN1);
+  s2 = digitalRead(BTN2);
 
   disp();
+  button();
   //dmemory[0] = 2; dmemory[1] = 1;
 
   delay(100);
 }
 
+void button() {
+  //Button Reading
+  if (s1 == 1 && s1last == 0) {
+    s1last = 1;
+    settingMillis = millis();
+  } else if (s1 == 0 && s1last == 1) {
+    s1last = 0;
+    if(millis() - settingMillis < settingHold) {
+      dl = 1;
+    } else if (dmemory[0] != 0 && dmemory[3] == 0) {
+      dl = 1;
+    } else if (dmemory[3] == 1) {
+      dmemory[3] = 0;
+    }
+  }
+  if (s2 == 1 && s2last == 0) {
+    s2last = 1;
+  } else if (s2 == 0 && s2last == 1) {
+    s2last = 0;
+    dr = 1;
+  }
+
+  if(s1last == 1 && millis() - settingMillis > settingHold && dmemory[0] == 0) {
+    dmemory[0] = 1;
+    dmemory[2] = dmemory[1];
+    dmemory[1] = 0;
+    dmemory[3] = 1;
+    dl = 0;
+    dchange = 1;
+  }
+
+  //Button Action
+  if (dmemory[0] == 0) {
+    if (dl == 1) {
+      if (dmemory[1] > 0) {
+        --dmemory[1];
+      } else if (dmemory[1] == 0) {
+        dmemory[1] = 4;
+      }
+      dl = 0;
+      dchange = 1;
+    } else if (dr == 1) {
+      if (dmemory[1] < 4) {
+        ++dmemory[1];
+      } else if (dmemory[1] == 4) {
+        dmemory[1] = 0;
+      }
+      dr = 0;
+      dchange = 1;
+    }
+  }
+
+  if (dmemory[0] == 1) {
+    if (dl == 1) {
+      if (dmemory[1] < 3) {
+        ++dmemory[1];
+      } else if (dmemory[1] == 3) {
+        dmemory[1] = 0;
+      }
+      dl = 0;
+      dchange = 1;
+    }
+    if (dr == 1) {
+      switch (dmemory[1]) {
+        case 0:
+          dmemory[0] = 2;
+          dmemory[1] = 0;
+          break;
+        case 1:
+          dmemory[0] = 3;
+          dmemory[1] = 0;
+          break;
+        case 2:
+          dmemory[0] = 4;
+          dmemory[1] = 0;
+          break;
+        case 3:
+          dmemory[0] = 0;
+          dmemory[1] = dmemory[2];
+          break;
+      }
+      dr = 0;
+      dchange = 1;
+    }
+  }
+
+  if (dmemory[0] == 2) {
+    if (dl == 1) {
+      if (dmemory[1] == 0) {
+        dmemory[1] = 1;
+      } else {
+        dmemory[1] = 0;
+      }
+      dl = 0;
+      dchange = 1;
+    }
+    if (dr == 1) {
+      if (dmemory[1] == 0) {
+        dmemory[0] = 1;
+        dmemory[1] = 0;
+      } else {
+        //WiFi Reset Code Here
+        //dispwreset();
+      }
+      dr = 0;
+      dchange = 1;
+    }
+  }
+
+  if (dmemory[0] == 3) {
+    if (dl == 1) {
+      if (dmemory[1] < 3) {
+        ++dmemory[1];
+      } else if (dmemory[1] == 3) {
+        dmemory[1] = 0;
+      }
+      dl = 0;
+      dchange = 1;
+    }
+    if (dr == 1) {
+      switch (dmemory[1]) {
+        case 0:
+          dmemory[0] = 1;
+          dmemory[1] = 1;
+          break;
+        case 1:
+          //Limit Set Code Here
+          break;
+        case 2:
+          //Limit Increase Code
+          break;
+        case 3:
+          //Limit Decrease Code
+          break;
+      }
+      dr = 0;
+      dchange = 1;
+    }
+  }
+
+  if (dmemory[0] == 4) {
+    if (dl == 1) {
+      if (dmemory[1] == 0) {
+        dmemory[1] = 1;
+      } else {
+        dmemory[1] = 0;
+      }
+      dl = 0;
+      dchange = 1;
+    }
+    if (dr == 1) {
+      if (dmemory[1] == 0) {
+        dmemory[0] = 1;
+        dmemory[1] = 2;
+      } else {
+        //Usage Reset Code Here
+        //disps();
+      }
+      dr = 0;
+      dchange = 1;
+    }
+  }
+}
+
 void disp() {
-  if (millis() - disprMillis > screenrefresh) {
+  if (millis() - disprMillis > screenrefresh || dchange == 1) {
     disprMillis = millis();
     display.clearDisplay();
     disptop();
     dispmain();
     display.display();
-    test();
+    dchange = 0;
+    //test();
   }
 }
 
@@ -220,6 +397,10 @@ void disp4() {
   dispbottom();
   dispcursor();
 }
+
+//void disps() //Complete Code Here
+
+//void dispwreset() //Complete Code Here
 
 void dispbottom() {
   display.setTextSize(1);
