@@ -37,12 +37,18 @@ bool dstat = 1;     //Display Status
 bool dchange = 0;   //Display Force Refresh
 bool dl = 0;        //Display Left Action
 bool dr = 0;        //Display Right Action
+bool sswitch = 0;   //Relay Trigger
+bool schange = 0;   //Relay Last State
+int dmemory [4] = {};      //Display Memory Array
 
 
 int screenrefresh = 2000;  //Screen Refresh Time
 int settingHold = 5000;    //Settings Hold Time
 
-int dmemory [4] = {};      //Display Memory Array
+int voltHigh = 260; //Voltage High Limit
+int voltLow = 200;  //Voltage Low Limit
+int freqHigh = 53;  //Frequency High Limit
+int freqLow = 47;   //Frequency Low Limit
 
 void setup() {
   Serial.begin(9600);
@@ -340,7 +346,7 @@ void disp0() {
       display.print("Total:   "); display.print(energy,3); display.println(" kWh");
       break;
     case 8: //Warning Page
-      //disp08();
+      dispw();
       break;
     case 9: //No Power Supply
       display.setTextSize(2); display.setTextColor(SSD1306_WHITE);
@@ -396,6 +402,24 @@ void disp4() {
   display.setCursor(70, 44); display.print("Proceed");
   dispbottom();
   dispcursor();
+}
+
+void dispw() {
+  if(schange == 0) {
+    if(voltHigh - voltage < 10 && voltHigh - voltage >= 0) {
+      //Caution Icon
+      display.setTextSize(1); display.setTextColor(SSD1306_WHITE);
+      display.setCursor(56, 20); display.print("Overvoltage");
+      display.setCursor(68, 30); display.print(voltage, 3);
+    }
+  } else {
+    //Warning Icon
+    display.setTextSize(1); display.setTextColor(SSD1306_WHITE);
+    display.setCursor(56, 12); display.print("Overvoltage");
+    display.setCursor(68, 22); display.print(voltage, 3);
+    display.setCursor(70, 34); display.print("Device");
+    display.setCursor(53, 42); display.print("Disconnected");
+  }
 }
 
 //void disps() //Complete Code Here
