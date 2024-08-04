@@ -311,10 +311,10 @@ void disp4 () {
 }
 
 void relay() {
-  if(voltage > voltHigh || (voltage < voltLow && voltage > 0)) {
+  if(voltage >= voltHigh || (voltage <= voltLow && voltage > 0)) {
     schange = 1;
     relayMillis = millis();
-  } else if (frequency > freqHigh || (frequency < freqLow && frequency > 0)) {
+  } else if (frequency >= freqHigh || (frequency <= freqLow && frequency > 0)) {
     schange = 1;
     relayMillis = millis();
   }
