@@ -104,22 +104,26 @@ void button() {
 
   //Button Action
   if (dmemory[0] == 0) {
-    if (dl == 1) {
-      if (dmemory[1] > 0) {
-        --dmemory[1];
-      } else if (dmemory[1] == 0) {
-        dmemory[1] = 4;
+    if(meter == 0) {
+      dmemory[1] = 9;
+    } else {
+      if (dl == 1) {
+        if (dmemory[1] > 0) {
+          --dmemory[1];
+        } else if (dmemory[1] == 0) {
+          dmemory[1] = 4;
+        }
+        dl = 0;
+        dchange = 1;
+      } else if (dr == 1) {
+        if (dmemory[1] < 4) {
+          ++dmemory[1];
+        } else if (dmemory[1] == 4) {
+          dmemory[1] = 0;
+        }
+        dr = 0;
+        dchange = 1;
       }
-      dl = 0;
-      dchange = 1;
-    } else if (dr == 1) {
-      if (dmemory[1] < 4) {
-        ++dmemory[1];
-      } else if (dmemory[1] == 4) {
-        dmemory[1] = 0;
-      }
-      dr = 0;
-      dchange = 1;
     }
   }
 
