@@ -353,8 +353,7 @@ void button() {
         dmemory[0] = 1;
         dmemory[1] = 2;
       } else {
-        //Usage Reset Code Here
-        //disps();
+        usagereset();
       }
       dr = 0;
       dchange = 1;
@@ -524,7 +523,9 @@ void disp3() {
 void disp4() {
   display.setTextSize(1);
   display.setTextColor(SSD1306_WHITE);
-  display.setCursor(0, 12); display.print("   Following action    cannot be undo, Do  you want to proceed");
+  display.setCursor(15, 12); display.print("Following action");
+  display.setCursor(9, 22); display.print("cannot be undo, do");
+  display.setCursor(6, 32); display.print("you want to proceed");
   display.setCursor(22, 44); display.print("Back");
   display.setCursor(70, 44); display.print("Proceed");
   dispbottom();
@@ -549,7 +550,26 @@ void dispw() {
   }
 }
 
-//void disps() //Complete Code Here
+void usagereset() {
+  if(meter == 0) {
+    display.clearDisplay();
+    display.setTextSize(1); display.setTextColor(SSD1306_WHITE);
+    display.setCursor(32, 15); display.print("Power Meter");
+    display.setCursor(24, 25); display.print("Not Connected!");
+    display.display();
+    delay(2000);
+    dmemory[1] = 0;
+  } else {
+    display.clearDisplay();
+    display.setTextSize(1); display.setTextColor(SSD1306_WHITE);
+    display.setCursor(31, 15); display.print("Usage Reset");
+    display.setCursor(38, 25); display.print("Complete!");
+    display.display();
+    delay(2000);
+    pzem.resetEnergy();
+    dmemory[1] = 0;
+  }
+}
 
 //void dispwreset() //Complete Code Here
 
