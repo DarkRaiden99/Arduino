@@ -100,6 +100,18 @@ const unsigned char cross[] PROGMEM  ={
 /*const unsigned char ok[] PROGMEM  ={
   0x00, 0x01, 0x02, 0x04, 0x04, 0x48, 0x28, 0x10
 };*/
+//pwr, 8x8
+const unsigned char pwr[] PROGMEM = {
+	0x04, 0x08, 0x18, 0x3e, 0x7c, 0x18, 0x10, 0x20
+};
+//settings, 8x8
+const unsigned char settings[] PROGMEM = {
+	0x24, 0x74, 0x74, 0x24, 0x2e, 0x2e, 0x24, 0x24
+};
+//chart, 8x8
+const unsigned char chart[] PROGMEM = {
+	0x20, 0x51, 0x8a, 0x24, 0x71, 0xfb, 0xff, 0xff
+};
 
 //PZEM Variables
 float voltage=0;
@@ -160,7 +172,7 @@ int relaytimer = 60000;    //Relay Reset Time
 int meterrefresh = 2000;   //Meter Reading Refresh Time
 int screenrefresh = 2000;  //Screen Refresh Time
 int usagerefresh = 60000;  //Usage Refresh Time
-int limitreset = 86400000; //Limit Reset Time
+int limitreset = 86400000; //Limit Reset Time (1 Day)
 
 float voltoffset = -3;    //Voltage Offset
 float curoffset = 0;      //Current Offset
@@ -456,35 +468,35 @@ void dispbody() {
 
 void disptop () {
   if (dmemory [0] == 0) {
-    //add power icon here
+    display.drawBitmap(0,0,pwr,8,8,WHITE);
     display.setTextSize(1);
     display.setTextColor(SSD1306_WHITE);
     display.setCursor(12, 0);
     display.print("Power Meter");
     dispwifi();
   } else if (dmemory [0] == 1) {
-    //add settings icon here
+    display.drawBitmap(0,0,settings,8,8,WHITE);
     display.setTextSize(1);
     display.setTextColor(SSD1306_WHITE);
     display.setCursor(12, 0);
     display.print("Settings");
     dispwifi();
   } else if (dmemory [0] == 2) {
-    //add settings icon here
+    display.drawBitmap(0,0,wifi,8,8,WHITE);
     display.setTextSize(1);
     display.setTextColor(SSD1306_WHITE);
     display.setCursor(12, 0);
     display.print("WiFi Settings");
     dispwifi();
   } else if (dmemory [0] == 3) {
-    //add settings icon here
+    display.drawBitmap(0,0,chart,8,8,WHITE);
     display.setTextSize(1);
     display.setTextColor(SSD1306_WHITE);
     display.setCursor(12, 0);
     display.print("Daily Usage Limit");
     dispwifi();
   } else if (dmemory [0] == 4) {
-    //add settings icon here
+    display.drawBitmap(0,0,chart,8,8,WHITE);
     display.setTextSize(1);
     display.setTextColor(SSD1306_WHITE);
     display.setCursor(12, 0);
