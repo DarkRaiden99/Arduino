@@ -308,8 +308,7 @@ void button() {
         dmemory[0] = 1;
         dmemory[1] = 0;
       } else {
-        //WiFi Reset Code Here
-        //dispwreset();
+        wifireset();
       }
       dr = 0;
       dchange = 1;
@@ -411,7 +410,7 @@ void dispbody() {
       display.setTextSize(1);
       display.setTextColor(SSD1306_WHITE);
       display.setCursor(0, 16); display.print("Saved SSID:");
-      display.setCursor(0, 26); display.print("SLT_FIBRE");
+      display.setCursor(0, 26); display.print("~ Not Configured");
       display.setCursor(22, 40); display.print("Back");
       display.setCursor(74, 40); display.print("Reset");
       dispbottom();
@@ -517,7 +516,7 @@ void dispmain() {
       display.setTextSize(1); display.setTextColor(SSD1306_WHITE); display.setCursor(0, 16);
       display.println("Energy Consumption");
       display.setCursor(0, 30);
-      display.print("1hr:     "); display.print(hourly,3); display.println(" kwh");
+      display.print("1hr:     "); display.print(hourly,3); display.println(" kWh");
       display.print("24hrs:   "); display.print(daily,3); display.println(" kWh");
       display.setCursor(0, 56);
       display.print("Total:   "); display.print(energy,3); display.println(" kWh");
@@ -526,8 +525,8 @@ void dispmain() {
       display.setTextSize(1); display.setTextColor(SSD1306_WHITE); display.setCursor(0, 16);
       display.println("Usage Limit");
       display.setCursor(0, 30);
-      display.print("Limit:   "); display.print(hourly,3); display.println(" kwh");
-      display.print("Usage:   "); display.print(daily,3); display.println(" kWh");
+      display.print("Limit:   "); display.print(usagelim,3); display.println(" kWh");
+      display.print("Usage:   "); display.print(limitusage,3); display.println(" kWh");
       display.setCursor(0, 56);
       display.print("Total:   "); display.print(energy,3); display.println(" kWh");
       break;
@@ -754,6 +753,18 @@ void usagereset() {
     delay(2000);
     pzem.resetEnergy();
     dmemory[1] = 0;
+  }
+}
+
+void wifireset() {
+  if(wifistat == 0) {
+    display.clearDisplay();
+    display.setTextSize(1); display.setTextColor(SSD1306_WHITE);
+    display.setCursor(6, 15); display.print("WiFi Not Configured!");
+    display.setCursor(20, 25); display.println("Connect to WiFi");
+    display.setCursor(8, 35); display.println("Station and Config");
+    display.display();
+    delay(3000);
   }
 }
 
