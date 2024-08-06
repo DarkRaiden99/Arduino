@@ -117,6 +117,7 @@ unsigned long resetMillis = 0;    //Reset Countdown
 unsigned long relayMillis = 0;    //Relay Timer
 unsigned long usageMillis = 0;    //Usage Timer
 unsigned long settingMillis = 0;  //Setting Hold Timer
+unsigned long limitMillis = 0;    //Usage Limit Timer
 
 //Triggers and Conditions
 bool meter = 0;     //PZEM Connection
@@ -130,6 +131,7 @@ bool dchange = 0;   //Display Force Refresh
 bool dl = 0;        //Display Left Action
 bool dr = 0;        //Display Right Action
 bool sswitch = 0;   //Relay Trigger
+bool sswitch2 = 0;  //Relay Trigger
 bool schange = 0;   //Relay Last State
 bool use = 0;       //Usage Last State
 bool h2 = 0;        //Hourly Usage Last State
@@ -147,6 +149,8 @@ int h1 = 0;             //H_Usage Array Location1
 int h12 = 0;            //H_Usage Array Location2
 int d1 = 0;             //D_Usage Array Location1
 int d12 = 0;            //D_Usage Array Location2
+float initialusage = 0; //Initial Usage
+float limitusage = 0;   //Limit Usage
 
 //Timers and Threshholds (in Milliseconds)
 int screentimeout = 30000; //Screen Timeout
@@ -156,14 +160,17 @@ int relaytimer = 60000;    //Relay Reset Time
 int meterrefresh = 2000;   //Meter Reading Refresh Time
 int screenrefresh = 2000;  //Screen Refresh Time
 int usagerefresh = 60000;  //Usage Refresh Time
+int limitreset = 86400000; //Limit Reset Time
 
-float voltoffset = -3;  //Voltage Offset
-float curoffset = 0;    //Current Offset
-int voltHigh = 260;     //Voltage High Limit
-int voltLow = 200;      //Voltage Low Limit
-int freqHigh = 53;      //Frequency High Limit
-int freqLow = 47;       //Frequency Low Limit
-int pageCount = 4;      //Page Count
+float voltoffset = -3;    //Voltage Offset
+float curoffset = 0;      //Current Offset
+int voltHigh = 260;       //Voltage High Limit
+int voltLow = 200;        //Voltage Low Limit
+int freqHigh = 53;        //Frequency High Limit
+int freqLow = 47;         //Frequency Low Limit
+int pageCount = 4;        //Page Count
+float usagelim = 1.0;     //Usage Limit
+float usagelimNew = 0.5;  //Usage Limit Temp
 
 void setup() {
   Serial.begin(9600);
@@ -324,15 +331,24 @@ void button() {
         case 0:
           dmemory[0] = 1;
           dmemory[1] = 1;
+          usagelimNew = 0.5;
           break;
         case 1:
-          //Limit Set Code Here
+          usagelim = usagelimNew;
           break;
         case 2:
-          //Limit Increase Code
+          if(usagelimNew < 10) {
+            usagelimNew = usagelimNew + 0.5;
+          } else {
+            usagelimNew = 10;
+          }
           break;
         case 3:
-          //Limit Decrease Code
+          if(usagelimNew > 0) {
+            usagelimNew = usagelimNew - 0.5;
+          } else {
+            usagelimNew = 0;
+          }
           break;
       }
       dr = 0;
@@ -405,7 +421,17 @@ void dispbody() {
       display.setTextSize(1);
       display.setTextColor(SSD1306_WHITE);
       display.setCursor(0, 16); display.print("Current:");
+      if (usagelim > 0) {
+        display.setCursor(56, 16); display.print(usagelim, 3); display.print(" kWh");
+      } else {
+        display.setCursor(56, 16); display.print("No Limit");
+      }
       display.setCursor(0, 24); display.print("New:");
+      if (usagelimNew > 0) {
+        display.setCursor(56, 24); display.print(usagelimNew, 3); display.print(" kWh");
+      } else {
+        display.setCursor(56, 24); display.print("No Limit");
+      }
       display.setCursor(8, 40); display.print("Back");
       display.setCursor(42, 40); display.print("Set");
       display.setCursor(72, 40); display.print("(+)");
@@ -617,7 +643,7 @@ void relay() {
     sswitch = 0;
   }
 
-  if (sswitch == 1) {
+  if (sswitch == 1 || sswitch2 == 1) {
     digitalWrite(RLY, HIGH);
   } else {
     digitalWrite(RLY, LOW);
@@ -640,6 +666,7 @@ void meterreading() {
       if(use == 0) {
         hAry[0] = energy;
         dAry[0] = energy;
+        initialusage = energy;
         use = 1;
       }
     } else {
@@ -730,7 +757,19 @@ void usagereset() {
   }
 }
 
-//void usagelimit()
+void usagelimit() {
+  if(millis() - limitMillis < limitreset) {
+    limitusage = energy - initialusage;
+    if(initialusage >= usagelim && usagelimit != 0) {
+      sswitch2 = 1;
+    }
+  } else {
+    limitMillis = millis();
+    initialusage = energy;
+    limitusage = 0;
+    sswitch2 = 0;
+  }
+}
 
 void bootscreen() {
   display.clearDisplay();
