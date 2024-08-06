@@ -155,13 +155,15 @@ int resettimer = 10000;    //Screen Reset Timer
 int relaytimer = 60000;    //Relay Reset Time
 int meterrefresh = 2000;   //Meter Reading Refresh Time
 int screenrefresh = 2000;  //Screen Refresh Time
-int usagerefresh = 60000;  //Usage Refresh Time (2mins)
+int usagerefresh = 60000;  //Usage Refresh Time
 
-int voltHigh = 260; //Voltage High Limit
-int voltLow = 200;  //Voltage Low Limit
-int freqHigh = 53;  //Frequency High Limit
-int freqLow = 47;   //Frequency Low Limit
-int pageCount = 4;  //Page Count
+float voltoffset = -3;  //Voltage Offset
+float curoffset = 0;    //Current Offset
+int voltHigh = 260;     //Voltage High Limit
+int voltLow = 200;      //Voltage Low Limit
+int freqHigh = 53;      //Frequency High Limit
+int freqLow = 47;       //Frequency Low Limit
+int pageCount = 4;      //Page Count
 
 void setup() {
   Serial.begin(9600);
@@ -629,7 +631,8 @@ void meterreading() {
 
     if( !isnan(voltage) ){
       meter = 1;
-      current = pzem.current();
+      voltage = voltage + voltoffset;
+      current = pzem.current() + curoffset;
       power = pzem.power();
       energy = pzem.energy();
       frequency = pzem.frequency();
