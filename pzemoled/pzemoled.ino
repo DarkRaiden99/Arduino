@@ -169,7 +169,7 @@ int voltLow = 200;        //Voltage Low Limit
 int freqHigh = 53;        //Frequency High Limit
 int freqLow = 47;         //Frequency Low Limit
 int pageCount = 4;        //Page Count
-float usagelim = 1.0;     //Usage Limit
+float usagelim = 0;       //Usage Limit
 float usagelimNew = 0.5;  //Usage Limit Temp
 
 void setup() {
@@ -515,20 +515,27 @@ void dispmain() {
     case 3: //Last Usage
       display.setTextSize(1); display.setTextColor(SSD1306_WHITE); display.setCursor(0, 16);
       display.println("Energy Consumption");
-      display.setCursor(0, 30);
-      display.print("1hr:     "); display.print(hourly,3); display.println(" kWh");
-      display.print("24hrs:   "); display.print(daily,3); display.println(" kWh");
+      display.setCursor(0, 29);
+      display.print("1hr:     "); display.print(hourly,3); display.print(" kWh");
+      display.setCursor(0, 39);
+      display.print("24hrs:   "); display.print(daily,3); display.print(" kWh");
       display.setCursor(0, 56);
-      display.print("Total:   "); display.print(energy,3); display.println(" kWh");
+      display.print("Total:   "); display.print(energy,3); display.print(" kWh");
       break;
     case 4: //Daily Limit
       display.setTextSize(1); display.setTextColor(SSD1306_WHITE); display.setCursor(0, 16);
       display.println("Usage Limit");
-      display.setCursor(0, 30);
-      display.print("Limit:   "); display.print(usagelim,3); display.println(" kWh");
-      display.print("Usage:   "); display.print(limitusage,3); display.println(" kWh");
+      display.setCursor(0, 29);
+      display.print("Limit:   ");
+      if (usagelim > 0) {
+        display.print(usagelim, 3); display.print(" kWh");
+      } else {
+        display.print("No Limit");
+      }
+      display.setCursor(0, 39);
+      display.print("Usage:   "); display.print(limitusage,3); display.print(" kWh");
       display.setCursor(0, 56);
-      display.print("Total:   "); display.print(energy,3); display.println(" kWh");
+      display.print("Total:   "); display.print(energy,3); display.print(" kWh");
       break;
     case 8: //Warning Page
       dispw();
