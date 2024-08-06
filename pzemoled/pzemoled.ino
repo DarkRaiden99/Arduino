@@ -366,29 +366,61 @@ void disp() {
     disprMillis = millis();
     display.clearDisplay();
     disptop();
-    dispmain();
+    dispbody();
     display.display();
     dchange = 0;
     //test();
   }
 }
 
-void dispmain() {
+void dispbody() {
   switch (dmemory[0]) {
     case 0:
-      disp0();
+      dispmain();
       break;
     case 1:
-      disp1();
+      display.setTextSize(1);
+      display.setTextColor(SSD1306_WHITE);
+      display.setCursor(12, 0); display.print("Settings");
+      display.setCursor(12, 14); display.print("WiFi Settings");
+      display.setCursor(12, 23); display.print("Daily Usage Limit");
+      display.setCursor(12, 32); display.print("Usage Reset");
+      display.setCursor(12, 41); display.print("Back");
+      dispbottom();
+      dispcursor();
       break;
     case 2:
-      disp2();
+      display.setTextSize(1);
+      display.setTextColor(SSD1306_WHITE);
+      display.setCursor(0, 16); display.print("Saved SSID:");
+      display.setCursor(0, 26); display.print("SLT_FIBRE");
+      display.setCursor(22, 40); display.print("Back");
+      display.setCursor(74, 40); display.print("Reset");
+      dispbottom();
+      dispcursor();
       break;
     case 3:
-      disp3();
+      display.setTextSize(1);
+      display.setTextColor(SSD1306_WHITE);
+      display.setCursor(0, 16); display.print("Current:");
+      display.setCursor(0, 24); display.print("New:");
+      display.setCursor(8, 40); display.print("Back");
+      display.setCursor(42, 40); display.print("Set");
+      display.setCursor(72, 40); display.print("(+)");
+      display.setCursor(102, 40); display.print("(-)");
+      dispbottom();
+      dispcursor();
       break;
     case 4:
-      disp4();
+      display.setTextSize(1);
+      display.setTextColor(SSD1306_WHITE);
+      display.setCursor(15, 12); display.print("Following action");
+      display.setCursor(9, 22); display.print("cannot be undo, do");
+      display.setCursor(6, 32); display.print("you want to proceed");
+      display.setCursor(22, 44); display.print("Back");
+      display.setCursor(70, 44); display.print("Proceed");
+      dispbottom();
+      dispcursor();
       break;
   }
 }
@@ -432,7 +464,7 @@ void disptop () {
   }
 }
 
-void disp0() {
+void dispmain() {
   switch (dmemory[1]) {
     case 0:
       display.setTextSize(1); display.setTextColor(SSD1306_WHITE); display.setCursor(0, 16);
@@ -483,95 +515,6 @@ void disp0() {
       break;
     }
 }
-
-void disp1() {
-  display.setTextSize(1);
-  display.setTextColor(SSD1306_WHITE);
-  display.setCursor(12, 0); display.print("Settings");
-  display.setCursor(12, 14); display.print("WiFi Settings");
-  display.setCursor(12, 23); display.print("Daily Usage Limit");
-  display.setCursor(12, 32); display.print("Usage Reset");
-  display.setCursor(12, 41); display.print("Back");
-  dispbottom();
-  dispcursor();
-}
-
-void disp2() {
-  display.setTextSize(1);
-  display.setTextColor(SSD1306_WHITE);
-  display.setCursor(0, 16); display.print("Saved SSID:");
-  display.setCursor(0, 26); display.print("SLT_FIBRE");
-  display.setCursor(22, 40); display.print("Back");
-  display.setCursor(74, 40); display.print("Reset");
-  dispbottom();
-  dispcursor();
-}
-
-void disp3() {
-  display.setTextSize(1);
-  display.setTextColor(SSD1306_WHITE);
-  display.setCursor(0, 16); display.print("Current:");
-  display.setCursor(0, 24); display.print("New:");
-  display.setCursor(8, 40); display.print("Back");
-  display.setCursor(42, 40); display.print("Set");
-  display.setCursor(72, 40); display.print("(+)");
-  display.setCursor(102, 40); display.print("(-)");
-  dispbottom();
-  dispcursor();
-}
-
-void disp4() {
-  display.setTextSize(1);
-  display.setTextColor(SSD1306_WHITE);
-  display.setCursor(15, 12); display.print("Following action");
-  display.setCursor(9, 22); display.print("cannot be undo, do");
-  display.setCursor(6, 32); display.print("you want to proceed");
-  display.setCursor(22, 44); display.print("Back");
-  display.setCursor(70, 44); display.print("Proceed");
-  dispbottom();
-  dispcursor();
-}
-
-void dispw() {
-  if(schange == 0) {
-    if(voltHigh - voltage < 10 && voltHigh - voltage >= 0) {
-      //Caution Icon
-      display.setTextSize(1); display.setTextColor(SSD1306_WHITE);
-      display.setCursor(56, 20); display.print("Overvoltage");
-      display.setCursor(68, 30); display.print(voltage, 3);
-    }
-  } else {
-    //Warning Icon
-    display.setTextSize(1); display.setTextColor(SSD1306_WHITE);
-    display.setCursor(56, 12); display.print("Overvoltage");
-    display.setCursor(68, 22); display.print(voltage, 3);
-    display.setCursor(70, 34); display.print("Device");
-    display.setCursor(53, 42); display.print("Disconnected");
-  }
-}
-
-void usagereset() {
-  if(meter == 0) {
-    display.clearDisplay();
-    display.setTextSize(1); display.setTextColor(SSD1306_WHITE);
-    display.setCursor(32, 15); display.print("Power Meter");
-    display.setCursor(24, 25); display.print("Not Connected!");
-    display.display();
-    delay(2000);
-    dmemory[1] = 0;
-  } else {
-    display.clearDisplay();
-    display.setTextSize(1); display.setTextColor(SSD1306_WHITE);
-    display.setCursor(31, 15); display.print("Usage Reset");
-    display.setCursor(38, 25); display.print("Complete!");
-    display.display();
-    delay(2000);
-    pzem.resetEnergy();
-    dmemory[1] = 0;
-  }
-}
-
-//void dispwreset() //Complete Code Here
 
 void dispbottom() {
   display.setTextSize(1);
@@ -631,6 +574,24 @@ void dispcursor () {
         display.setCursor(62, 44);display.print(">");
         break;
     }
+  }
+}
+
+void dispw() {
+  if(schange == 0) {
+    if(voltHigh - voltage < 10 && voltHigh - voltage >= 0) {
+      //Caution Icon
+      display.setTextSize(1); display.setTextColor(SSD1306_WHITE);
+      display.setCursor(56, 20); display.print("Overvoltage");
+      display.setCursor(68, 30); display.print(voltage, 3);
+    }
+  } else {
+    //Warning Icon
+    display.setTextSize(1); display.setTextColor(SSD1306_WHITE);
+    display.setCursor(56, 12); display.print("Overvoltage");
+    display.setCursor(68, 22); display.print(voltage, 3);
+    display.setCursor(70, 34); display.print("Device");
+    display.setCursor(53, 42); display.print("Disconnected");
   }
 }
 
@@ -744,6 +705,29 @@ void usagememory() {
     }
   }
 }
+
+void usagereset() {
+  if(meter == 0) {
+    display.clearDisplay();
+    display.setTextSize(1); display.setTextColor(SSD1306_WHITE);
+    display.setCursor(32, 15); display.print("Power Meter");
+    display.setCursor(24, 25); display.print("Not Connected!");
+    display.display();
+    delay(2000);
+    dmemory[1] = 0;
+  } else {
+    display.clearDisplay();
+    display.setTextSize(1); display.setTextColor(SSD1306_WHITE);
+    display.setCursor(31, 15); display.print("Usage Reset");
+    display.setCursor(38, 25); display.print("Complete!");
+    display.display();
+    delay(2000);
+    pzem.resetEnergy();
+    dmemory[1] = 0;
+  }
+}
+
+//void usagelimit()
 
 void bootscreen() {
   display.clearDisplay();
