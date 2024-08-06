@@ -196,6 +196,8 @@ void loop() {
 
   usagememory();
 
+  usagelimit();
+
   relay();
 
   disp();
@@ -533,9 +535,9 @@ void dispmain() {
         display.print("No Limit");
       }
       display.setCursor(0, 39);
-      display.print("Usage:   "); display.print(limitusage,3); display.print(" kWh");
+      display.print("Usage:   "); display.print(limitusage, 3); display.print(" kWh");
       display.setCursor(0, 56);
-      display.print("Total:   "); display.print(energy,3); display.print(" kWh");
+      display.print("Total:   "); display.print(energy, 3); display.print(" kWh");
       break;
     case 8: //Warning Page
       dispw();
@@ -778,8 +780,10 @@ void wifireset() {
 void usagelimit() {
   if(millis() - limitMillis < limitreset) {
     limitusage = energy - initialusage;
-    if(initialusage >= usagelim && usagelimit != 0) {
+    if(initialusage >= usagelim && usagelim != 0) {
       sswitch2 = 1;
+    } else {
+      sswitch2= 0;
     }
   } else {
     limitMillis = millis();
