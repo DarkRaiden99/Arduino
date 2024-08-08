@@ -161,6 +161,7 @@ unsigned long warnrMillis = 0;    //Warning Reset Timer
 
 //Triggers and Conditions
 bool meter = 0;     //PZEM Connection
+bool meterw = 0;    //PZEM Connection Warning
 bool wifistat = 0;  //Wifi Connection
 bool s1 = 0;        //Left Button
 bool s1last = 0;    //Left Button Last State
@@ -285,7 +286,7 @@ void button() {
 
   //Button Action
   if (dmemory[0] == 0) {
-    if(cwarn == 0) {
+    if(cwarn == 0 && meter == 1) {
       if (dl == 1) {
         if (dmemory[1] > 0) {
           --dmemory[1];
@@ -596,7 +597,7 @@ void dispmain() {
       if(schange == 0) {
         display.drawBitmap(2,16,warn,32,32,WHITE);
         display.setTextSize(1); display.setTextColor(SSD1306_WHITE);
-        if(voltHigh - voltage <= 10) {
+        if(voltHigh - voltage <= 30) {
           display.setCursor(56, 20); display.print("Overvoltage");
         } else {
           display.setCursor(54, 20); display.print("Undervoltage");
@@ -605,7 +606,7 @@ void dispmain() {
       } else {
         display.drawBitmap(2,16,crit,32,32,WHITE);
         display.setTextSize(1); display.setTextColor(SSD1306_WHITE);
-        if(voltHigh - voltage <= 10) {
+        if(voltHigh - voltage <= 30) {
           display.setCursor(56, 20); display.print("Overvoltage");
         } else {
           display.setCursor(54, 20); display.print("Undervoltage");
@@ -883,6 +884,23 @@ void warning() {
   if (pwarn == 1 && millis() - warnrMillis > warnreset) {
     nwarn = 0;
     pwarn = 0;
+  }
+  if (meter == 0 && meterw == 0) {
+    if(dmemory[0] == 0) {
+      dmemory[2] = dmemory[1];
+      dmemory[1] = 9;
+    } else {
+      dmemory[0] = 0;
+      dmemory[1] = 9;
+    }
+    meterw = 1;
+  }
+  if (meter == 1) {
+    if(meterw == 1) {
+      dmemory[0] = 0;
+      dmemory[1] = dmemory[2];
+    }
+    meterw = 0;
   }
 }
 
