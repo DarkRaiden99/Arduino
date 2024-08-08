@@ -541,7 +541,7 @@ void disptop () {
     display.print("Usage Reset");
     dispwifi();
   }
-  if(cwarn == 1 || nwarn == 1) {
+  if(sswitch == 1 || sswitch2 == 1 || nwarn == 1) {
     display.drawBitmap(120,0,warns,8,8,WHITE);
   }
 }
@@ -596,12 +596,20 @@ void dispmain() {
       if(schange == 0) {
         display.drawBitmap(2,16,warn,32,32,WHITE);
         display.setTextSize(1); display.setTextColor(SSD1306_WHITE);
-        display.setCursor(56, 20); display.print("Overvoltage");
+        if(voltHigh - voltage < 11) {
+          display.setCursor(56, 20); display.print("Overvoltage");
+        } else {
+          display.setCursor(54, 20); display.print("Undervoltage");
+        }
         display.setCursor(68, 30); display.print(voltage, 2); display.print(" V");
       } else {
         display.drawBitmap(2,16,crit,32,32,WHITE);
         display.setTextSize(1); display.setTextColor(SSD1306_WHITE);
-        display.setCursor(56, 12); display.print("Overvoltage");
+        if(voltHigh - voltage < 11) {
+          display.setCursor(56, 20); display.print("Overvoltage");
+        } else {
+          display.setCursor(54, 20); display.print("Undervoltage");
+        }
         display.setCursor(68, 22); display.print(voltage, 2); display.print(" V");
         display.setCursor(70, 34); display.print("Device");
         display.setCursor(53, 42); display.print("Disconnected");
@@ -841,7 +849,7 @@ void usagelimit() {
 }
 
 void warning() {
-  if (voltHigh - voltage < 10 && voltage < voltHigh && schange == 0) {
+  if ((voltHigh - voltage < 10 && voltage < voltHigh) || (voltage - voltLow < 10 && voltage > voltLow) && schange == 0) {
     if (pwarn == 0 && nwarn == 0) {
       nwarn = 1;
       warnMillis = millis();
