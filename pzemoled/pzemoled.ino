@@ -596,7 +596,7 @@ void dispmain() {
       if(schange == 0) {
         display.drawBitmap(2,16,warn,32,32,WHITE);
         display.setTextSize(1); display.setTextColor(SSD1306_WHITE);
-        if(voltHigh - voltage < 11) {
+        if(voltHigh - voltage <= 10) {
           display.setCursor(56, 20); display.print("Overvoltage");
         } else {
           display.setCursor(54, 20); display.print("Undervoltage");
@@ -605,7 +605,7 @@ void dispmain() {
       } else {
         display.drawBitmap(2,16,crit,32,32,WHITE);
         display.setTextSize(1); display.setTextColor(SSD1306_WHITE);
-        if(voltHigh - voltage < 11) {
+        if(voltHigh - voltage <= 10) {
           display.setCursor(56, 20); display.print("Overvoltage");
         } else {
           display.setCursor(54, 20); display.print("Undervoltage");
