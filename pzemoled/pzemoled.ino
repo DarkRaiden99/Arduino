@@ -870,6 +870,8 @@ void warning() {
     if(dmemory[0] == 0) {
       dmemory[2] = dmemory[1];
     }
+    nwarn = 0;
+    pwarn = 0;
     cwarn = 1;
     dmemory[0] = 0;
     dmemory[1] = 8;
