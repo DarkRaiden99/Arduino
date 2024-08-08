@@ -88,6 +88,28 @@ const unsigned char boot [] PROGMEM = {
 	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
 	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
 };
+// warn, 32x32px
+const unsigned char warn[] PROGMEM = {
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+	0x00, 0x0f, 0xf0, 0x00, 0x00, 0x3f, 0xfc, 0x00, 0x00, 0x7f, 0xff, 0x00, 0x01, 0xff, 0xff, 0x80, 
+	0x01, 0xff, 0xff, 0x80, 0x03, 0xff, 0xff, 0xc0, 0x07, 0xfe, 0x7f, 0xe0, 0x07, 0xfe, 0x7f, 0xe0, 
+	0x07, 0xfe, 0x7f, 0xe0, 0x0f, 0xfe, 0x7f, 0xf0, 0x0f, 0xfe, 0x7f, 0xf0, 0x0f, 0xfe, 0x7f, 0xf0, 
+	0x0f, 0xfe, 0x7f, 0xf0, 0x0f, 0xff, 0xff, 0xf0, 0x0f, 0xff, 0xff, 0xf0, 0x07, 0xfe, 0x7f, 0xe0, 
+	0x07, 0xfe, 0x7f, 0xe0, 0x03, 0xfe, 0x7f, 0xc0, 0x03, 0xff, 0xff, 0xc0, 0x01, 0xff, 0xff, 0x80, 
+	0x00, 0xff, 0xff, 0x00, 0x00, 0x7f, 0xfe, 0x00, 0x00, 0x1f, 0xf8, 0x00, 0x00, 0x03, 0xc0, 0x00, 
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+};
+// crit, 32x32px
+const unsigned char crit[] PROGMEM = {
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x80, 0x00, 
+	0x00, 0x01, 0x80, 0x00, 0x00, 0x03, 0xc0, 0x00, 0x00, 0x03, 0xc0, 0x00, 0x00, 0x07, 0xe0, 0x00, 
+	0x00, 0x07, 0xe0, 0x00, 0x00, 0x0f, 0xf0, 0x00, 0x00, 0x0c, 0x38, 0x00, 0x00, 0x1c, 0x38, 0x00, 
+	0x00, 0x1c, 0x3c, 0x00, 0x00, 0x3c, 0x3c, 0x00, 0x00, 0x3c, 0x3e, 0x00, 0x00, 0x7c, 0x3e, 0x00, 
+	0x00, 0xfc, 0x3f, 0x00, 0x00, 0xfc, 0x3f, 0x80, 0x01, 0xfc, 0x3f, 0x80, 0x01, 0xfc, 0x3f, 0xc0, 
+	0x03, 0xfc, 0x3f, 0xc0, 0x07, 0xff, 0xff, 0xe0, 0x07, 0xff, 0xff, 0xe0, 0x0f, 0xfe, 0x3f, 0xf0, 
+	0x0f, 0xfc, 0x3f, 0xf8, 0x1f, 0xfe, 0x7f, 0xf8, 0x1f, 0xff, 0xff, 0xfc, 0x3f, 0xff, 0xff, 0xfc, 
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+};
 //wifi, 8x8
 const unsigned char wifi[] PROGMEM  ={
   0xe0, 0x18, 0x04, 0xc2, 0x22, 0x11, 0xc9, 0xc9
@@ -97,9 +119,9 @@ const unsigned char cross[] PROGMEM  ={
   0x00, 0x42, 0x24, 0x10, 0x08, 0x24, 0x42, 0x00
 };
 //ok, 8x8
-/*const unsigned char ok[] PROGMEM  ={
+const unsigned char ok[] PROGMEM  ={
   0x00, 0x01, 0x02, 0x04, 0x04, 0x48, 0x28, 0x10
-};*/
+};
 //pwr, 8x8
 const unsigned char pwr[] PROGMEM = {
 	0x04, 0x08, 0x18, 0x3e, 0x7c, 0x18, 0x10, 0x20
@@ -111,6 +133,10 @@ const unsigned char settings[] PROGMEM = {
 //chart, 8x8
 const unsigned char chart[] PROGMEM = {
 	0x20, 0x51, 0x8a, 0x24, 0x71, 0xfb, 0xff, 0xff
+};
+// warns, 8x8px
+const unsigned char warns[] PROGMEM = {
+	0x3c, 0x66, 0xe7, 0xe7, 0xff, 0xe7, 0x66, 0x3c
 };
 
 //PZEM Variables
@@ -130,6 +156,8 @@ unsigned long relayMillis = 0;    //Relay Timer
 unsigned long usageMillis = 0;    //Usage Timer
 unsigned long settingMillis = 0;  //Setting Hold Timer
 unsigned long limitMillis = 0;    //Usage Limit Timer
+unsigned long warnMillis = 0;     //Warning Timer
+unsigned long warnrMillis = 0;    //Warning Reset Timer
 
 //Triggers and Conditions
 bool meter = 0;     //PZEM Connection
@@ -148,6 +176,9 @@ bool schange = 0;   //Relay Last State
 bool use = 0;       //Usage Last State
 bool h2 = 0;        //Hourly Usage Last State
 bool d2 = 0;        //Daily Usage Last State
+bool pwarn = 0;     //Warning Last State
+bool nwarn = 0;     //Warning State
+bool cwarn = 0;     //Critical Warning State
 
 //Other Memories
 int dmemory [4] = {};   //Display Memory Array
@@ -165,16 +196,18 @@ float initialusage = 0; //Initial Usage
 float limitusage = 0;   //Limit Usage
 
 //Timers and Threshholds (in Milliseconds)
-int screentimeout = 30000; //Screen Timeout
-int settingHold = 5000;    //Settings Hold Time
-int resettimer = 10000;    //Screen Reset Timer
-int relaytimer = 60000;    //Relay Reset Time
-int meterrefresh = 2000;   //Meter Reading Refresh Time
-int screenrefresh = 2000;  //Screen Refresh Time
-int usagerefresh = 60000;  //Usage Refresh Time
-int limitreset = 86400000; //Limit Reset Time (1 Day)
+int screentimeout = 30000;  //Screen Timeout
+int settingHold = 5000;     //Settings Hold Time
+int resettimer = 10000;     //Screen Reset Timer
+int relaytimer = 60000;     //Relay Reset Time
+int meterrefresh = 2000;    //Meter Reading Refresh Time
+int screenrefresh = 2000;   //Screen Refresh Time
+int usagerefresh = 60000;   //Usage Refresh Time
+int limitreset = 86400000;  //Limit Reset Time (1 Day)
+int warntimer = 5000;   //Warning Timer
+int warnreset = 60000;      //Warning Reset Time
 
-float voltoffset = -3;    //Voltage Offset
+float voltoffset = 0;     //Voltage Offset
 float curoffset = 0;      //Current Offset
 int voltHigh = 260;       //Voltage High Limit
 int voltLow = 200;        //Voltage Low Limit
@@ -211,6 +244,8 @@ void loop() {
   usagelimit();
 
   relay();
+
+  warning();
 
   disp();
 
@@ -250,14 +285,15 @@ void button() {
 
   //Button Action
   if (dmemory[0] == 0) {
-    /*if(meter == 0) {
-      dmemory[1] = 9;
-    } else {*/
+    if(cwarn == 0) {
       if (dl == 1) {
         if (dmemory[1] > 0) {
           --dmemory[1];
         } else if (dmemory[1] == 0) {
           dmemory[1] = 4;
+        } else if(dmemory[1] == 8) {
+          dmemory[1] = dmemory[2];
+          pwarn = 1;
         }
         dl = 0;
         dchange = 1;
@@ -266,13 +302,15 @@ void button() {
           ++dmemory[1];
         } else if (dmemory[1] == 4) {
           dmemory[1] = 0;
+        } else if (dmemory[1] == 8) {
+          dmemory[1] = dmemory[2];
+          pwarn = 1;
         }
         dr = 0;
         dchange = 1;
       }
-    //}
+    }
   }
-
   if (dmemory[0] == 1) {
     if (dl == 1) {
       if (dmemory[1] < 3) {
@@ -503,6 +541,9 @@ void disptop () {
     display.print("Usage Reset");
     dispwifi();
   }
+  if(cwarn == 1 || nwarn == 1) {
+    display.drawBitmap(120,0,warns,8,8,WHITE);
+  }
 }
 
 void dispmain() {
@@ -514,7 +555,7 @@ void dispmain() {
       display.print("Power:     "); display.print(power,2); display.println(" W");
       display.print("Usage:     "); display.print(energy,3); display.println(" kWh");
       display.print("Freq.:     "); display.print(frequency,1); display.println(" Hz");
-      display.print("PF:        "); display.print(pf,2);
+      //display.print("PF:        "); display.print(pf,2);
       break;
     case 1:
       display.setTextSize(2); display.setTextColor(SSD1306_WHITE);
@@ -552,7 +593,19 @@ void dispmain() {
       display.print("Total:   "); display.print(energy, 3); display.print(" kWh");
       break;
     case 8: //Warning Page
-      dispw();
+      if(schange == 0) {
+        display.drawBitmap(2,16,warn,32,32,WHITE);
+        display.setTextSize(1); display.setTextColor(SSD1306_WHITE);
+        display.setCursor(56, 20); display.print("Overvoltage");
+        display.setCursor(68, 30); display.print(voltage, 2); display.print(" V");
+      } else {
+        display.drawBitmap(2,16,crit,32,32,WHITE);
+        display.setTextSize(1); display.setTextColor(SSD1306_WHITE);
+        display.setCursor(56, 12); display.print("Overvoltage");
+        display.setCursor(68, 22); display.print(voltage, 2); display.print(" V");
+        display.setCursor(70, 34); display.print("Device");
+        display.setCursor(53, 42); display.print("Disconnected");
+      }
       break;
     case 9: //No Power Supply
       display.setTextSize(2); display.setTextColor(SSD1306_WHITE);
@@ -622,24 +675,6 @@ void dispcursor () {
         display.setCursor(62, 44);display.print(">");
         break;
     }
-  }
-}
-
-void dispw() {
-  if(schange == 0) {
-    if(voltHigh - voltage < 10 && voltHigh - voltage >= 0) {
-      //Caution Icon
-      display.setTextSize(1); display.setTextColor(SSD1306_WHITE);
-      display.setCursor(56, 20); display.print("Overvoltage");
-      display.setCursor(68, 30); display.print(voltage, 3);
-    }
-  } else {
-    //Warning Icon
-    display.setTextSize(1); display.setTextColor(SSD1306_WHITE);
-    display.setCursor(56, 12); display.print("Overvoltage");
-    display.setCursor(68, 22); display.print(voltage, 3);
-    display.setCursor(70, 34); display.print("Device");
-    display.setCursor(53, 42); display.print("Disconnected");
   }
 }
 
@@ -802,6 +837,44 @@ void usagelimit() {
     initialusage = energy;
     limitusage = 0;
     sswitch2 = 0;
+  }
+}
+
+void warning() {
+  if (voltHigh - voltage < 10 && voltage < voltHigh && schange == 0) {
+    if (pwarn == 0 && nwarn == 0) {
+      nwarn = 1;
+      warnMillis = millis();
+      warnrMillis = millis();
+      if(dmemory[0] == 0) {
+        dmemory[2] = dmemory[1];
+        dmemory[1] = 8;
+      } 
+    }
+    if (nwarn == 1 && pwarn == 0 && millis() - warnMillis > warntimer) {
+      pwarn = 1;
+      if(dmemory[0] == 0) {
+        dmemory[1] = dmemory[2];
+      }
+    }
+  } else if (schange == 1) {
+    if(dmemory[0] == 0) {
+      dmemory[2] = dmemory[1];
+    }
+    cwarn = 1;
+    dmemory[0] = 0;
+    dmemory[1] = 8;
+    dchange = 1;
+  }
+  if (schange == 0 && cwarn == 1) {
+    cwarn = 0;
+    dmemory[1] = dmemory[2];
+    dmemory[0] = 0;
+    dchange = 1;
+  }
+  if (pwarn == 1 && millis() - warnrMillis > warnreset) {
+    nwarn = 0;
+    pwarn = 0;
   }
 }
 
