@@ -28,11 +28,7 @@ float energy=0;
 float frequency=0;
 float pf=0;
 unsigned long lastMillis = 0;
-
-//Triggers
-int meter=0; //PZEM Connection
-int wifistat=0; //Wifi Connection
-int dstat=0; //OLED Switch
+unsigned long meterMillis = 0;
 
 void setup() {
   Serial.begin(9600);
@@ -43,17 +39,36 @@ void loop() {
 
     Blynk.run();
 
-    float voltage = pzem.voltage();
-    float current = pzem.current();
-    float power = pzem.power();
-    float energy = pzem.energy();
-    float frequency = pzem.frequency();
-    float pf = pzem.pf();
+    meterreading();
 
-    delay(2000);
+    blynkupdate();
 
-    //Publish data every 5 seconds (5000 milliseconds). Change this value to publish at a different interval.
-    if (millis() - lastMillis > 5000) {
+    delay(100);
+}
+
+void meterreading() {
+  if (millis() - meterMillis > 2000) {
+    meterMillis = millis();
+    voltage = pzem.voltage();
+
+    if( !isnan(voltage) ){
+      current = pzem.current();
+      power = pzem.power();
+      energy = pzem.energy();
+      frequency = pzem.frequency();
+      pf = pzem.pf();
+    } else {
+      voltage = 0;
+      current = 0;
+      power = 0;
+      frequency = 0;
+      pf = 0;
+    }
+  }
+}
+
+void blynkupdate() {
+  if (millis() - lastMillis > 5000) {
       lastMillis = millis();
             
       Blynk.virtualWrite(V1, voltage);
