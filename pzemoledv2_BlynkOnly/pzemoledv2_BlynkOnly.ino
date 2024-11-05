@@ -57,6 +57,9 @@ void meterreading() {
       energy = pzem.energy();
       frequency = pzem.frequency();
       pf = pzem.pf();
+      if(power < 1){
+        power = 0;
+      }
     } else {
       voltage = 0;
       current = 0;
