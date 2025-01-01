@@ -462,7 +462,7 @@ void dispbody() {
     case 2:
       display.setTextSize(1);
       display.setTextColor(SSD1306_WHITE);
-      display.setCursor(0, 16); display.print("Saved SSID:");
+      display.setC06); display.print("Saved SSID:");
       display.setCursor(0, 26); display.print("~ Not Configured");
       display.setCursor(22, 40); display.print("Back");
       display.setCursor(74, 40); display.print("Reset");
