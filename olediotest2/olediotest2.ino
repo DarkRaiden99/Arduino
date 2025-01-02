@@ -3,8 +3,8 @@
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
 
-#define BTN1 D5  //Main Button
-#define BTN2 D6  //Reset Button
+#define BTN1 D6  //Main Button
+#define BTN2 D5  //Reset Button
 
 #define SCREEN_WIDTH 128
 #define SCREEN_HEIGHT 64
@@ -27,7 +27,7 @@ unsigned long dispMillis = 0;     //Display Timeout Timer
 unsigned long disprMillis = 0;    //Display Refresh Timer
 unsigned long settingMillis = 0;  //Setting Hold Timer
 
-bool meter = 0;     //PZEM Connection
+bool meter = 1;     //PZEM Connection
 bool wifistat = 0;  //Wifi Connection
 bool s1 = 0;        //Left Button
 bool s1last = 0;    //Left Button Last State
