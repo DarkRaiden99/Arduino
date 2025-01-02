@@ -692,14 +692,17 @@ void dispwifi() {
 }
 
 void relay() {
+  //Checks whether voltage is lower or higher than the threshold
   if(voltage >= voltHigh || (voltage <= voltLow && voltage > 0)) {
     schange = 1;
     relayMillis = millis();
+  //Checks whether frequency is lower or higher than the threshold
   } else if (frequency >= freqHigh || (frequency <= freqLow && frequency > 0)) {
     schange = 1;
     relayMillis = millis();
   }
 
+  //Checks the Relay timer if its over the given specific timelimit or not
   if (schange == 1 && millis() - relayMillis < relaytimer) {
     sswitch = 1;
   } else {
@@ -707,6 +710,7 @@ void relay() {
     sswitch = 0;
   }
 
+  //Toggles the relay if the according to the relay timer and Volt/Freq changes
   if (sswitch == 1 || sswitch2 == 1) {
     digitalWrite(RLY, HIGH);
   } else {
@@ -715,10 +719,12 @@ void relay() {
 }
 
 void meterreading() {
+  //Reads the voltage from the Powermeter at meter refresh time
   if (millis() - meterMillis > meterrefresh) {
     meterMillis = millis();
     voltage = pzem.voltage();
-
+  
+  //Reads other values if the voltage is not null
     if( !isnan(voltage) ){
       meter = 1;
       voltage = voltage + voltoffset;
@@ -850,6 +856,7 @@ void usagelimit() {
 }
 
 void warning() {
+  //User warning when voltage is close to threshold
   if ((voltHigh - voltage < 10 && voltage < voltHigh) || (voltage - voltLow < 10 && voltage > voltLow) && schange == 0) {
     if (pwarn == 0 && nwarn == 0) {
       nwarn = 1;
