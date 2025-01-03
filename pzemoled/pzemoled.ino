@@ -197,7 +197,7 @@ float initialusage = 0; //Initial Usage
 float limitusage = 0;   //Limit Usage
 
 //Timers and Threshholds (in Milliseconds)
-int screentimeout = 30000;  //Screen Timeout
+int screentimeout = 60000;  //Screen Timeout
 int settingHold = 5000;     //Settings Hold Time
 int resettimer = 10000;     //Screen Reset Timer
 int relaytimer = 60000;     //Relay Reset Time
@@ -255,33 +255,53 @@ void loop() {
 
 void button() {
   //Button Reading
-  if (s1 == 1 && s1last == 0) {
-    s1last = 1;
-    settingMillis = millis();
-  } else if (s1 == 0 && s1last == 1) {
-    s1last = 0;
-    if(millis() - settingMillis < settingHold) {
-      dl = 1;
-    } else if (dmemory[0] != 0 && dmemory[3] == 0) {
-      dl = 1;
-    } else if (dmemory[3] == 1) {
-      dmemory[3] = 0;
+  if (dstat == 1) {
+      if (s1 == 1 && s1last == 0) {
+        dispMillis = millis();
+        s1last = 1;
+        settingMillis = millis();
+      } else if (s1 == 0 && s1last == 1) {
+        s1last = 0;
+        if(millis() - settingMillis < settingHold) {
+          dl = 1;
+        } else if (dmemory[0] != 0 && dmemory[3] == 0) {
+          dl = 1;
+        } else if (dmemory[3] == 1) {
+          dmemory[3] = 0;
+        }
+      }
+    if (s2 == 1 && s2last == 0) {
+      dispMillis = millis();
+      s2last = 1;
+    } else if (s2 == 0 && s2last == 1) {
+      s2last = 0;
+      dr = 1;
     }
-  }
-  if (s2 == 1 && s2last == 0) {
-    s2last = 1;
-  } else if (s2 == 0 && s2last == 1) {
-    s2last = 0;
-    dr = 1;
-  }
 
-  if(s1last == 1 && millis() - settingMillis > settingHold && dmemory[0] == 0) {
-    dmemory[0] = 1;
-    dmemory[2] = dmemory[1];
-    dmemory[1] = 0;
-    dmemory[3] = 1;
-    dl = 0;
-    dchange = 1;
+    if(s1last == 1 && millis() - settingMillis > settingHold && dmemory[0] == 0) {
+      dmemory[0] = 1;
+      dmemory[2] = dmemory[1];
+      dmemory[1] = 0;
+      dmemory[3] = 1;
+      dl = 0;
+      dchange = 1;
+    }
+  } else {
+    if (s1 == 1 && s1last == 0) {
+      s1last = 1;
+    } else if (s1 == 0 && s1last == 1) {
+      dstat = 1;
+      dispMillis = millis();
+      dchange = 1;
+      s1last = 0;
+    } else if (s2 == 1 && s2last == 0) {
+      s2last = 1;
+    } else if (s2 == 0 && s2last == 1) {
+      dstat = 1;
+      dispMillis = millis();
+      dchange = 1;
+      s2last = 0;
+    }
   }
 
   //Button Action
@@ -312,6 +332,7 @@ void button() {
       }
     }
   }
+  
   if (dmemory[0] == 1) {
     if (dl == 1) {
       if (dmemory[1] < 3) {
@@ -432,14 +453,21 @@ void button() {
 }
 
 void disp() {
-  if (millis() - disprMillis > screenrefresh || dchange == 1) {
-    disprMillis = millis();
+  if (dstat == 1 && millis() - dispMillis > screentimeout) {
     display.clearDisplay();
-    disptop();
-    dispbody();
     display.display();
+    dstat = 0;
     dchange = 0;
-    //test();
+  } else if (dstat == 1) {
+    if (millis() - disprMillis > screenrefresh || dchange == 1) {
+      disprMillis = millis();
+      display.clearDisplay();
+      disptop();
+      dispbody();
+      display.display();
+      dchange = 0;
+      //test();
+    }
   }
 }
 
