@@ -7,8 +7,8 @@
 #include <Adafruit_SSD1306.h>
 
 //Define Buttons & Relay
-#define BTN1 D5  //Left Button
-#define BTN2 D6  //Right Button
+#define BTN1 D6  //Left Button
+#define BTN2 D5  //Right Button
 #define RLY D7  //Main Relay
 
 //OLED Display Settings
@@ -712,9 +712,9 @@ void relay() {
 
   //Toggles the relay if the according to the relay timer and Volt/Freq changes
   if (sswitch == 1 || sswitch2 == 1) {
-    digitalWrite(RLY, HIGH);
-  } else {
     digitalWrite(RLY, LOW);
+  } else {
+    digitalWrite(RLY, HIGH);
   }
 }
 
