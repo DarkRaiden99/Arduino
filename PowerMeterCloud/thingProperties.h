@@ -9,6 +9,7 @@ const char SSID[]               = SECRET_SSID;    // Network SSID (name)
 const char PASS[]               = SECRET_OPTIONAL_PASS;    // Network password (use for WPA, or use as key for WEP)
 const char DEVICE_KEY[]  = SECRET_DEVICE_KEY;    // Secret device password
 
+void onCscreentimeoutChange();
 void onCvoltHighChange();
 void onCvoltLowChange();
 void onCpowerswitchChange();
@@ -18,6 +19,7 @@ CloudElectricPotential cvoltage;
 float cenergy;
 float cpF;
 CloudFrequency cfrequency;
+int cscreentimeout;
 int cvoltHigh;
 int cvoltLow;
 CloudPower cpower;
@@ -32,6 +34,7 @@ void initProperties(){
   ArduinoCloud.addProperty(cenergy, READ, ON_CHANGE, NULL);
   ArduinoCloud.addProperty(cpF, READ, ON_CHANGE, NULL);
   ArduinoCloud.addProperty(cfrequency, READ, ON_CHANGE, NULL);
+  ArduinoCloud.addProperty(cscreentimeout, READWRITE, ON_CHANGE, onCscreentimeoutChange);
   ArduinoCloud.addProperty(cvoltHigh, READWRITE, ON_CHANGE, onCvoltHighChange);
   ArduinoCloud.addProperty(cvoltLow, READWRITE, ON_CHANGE, onCvoltLowChange);
   ArduinoCloud.addProperty(cpower, READ, ON_CHANGE, NULL);
