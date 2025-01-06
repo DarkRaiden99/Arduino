@@ -264,9 +264,9 @@ void loop() {
 
   button();
 
-  //meterreading();
+  meterreading();
 
-  dummyreading();
+  //dummyreading();
 
   usagememory();
 
