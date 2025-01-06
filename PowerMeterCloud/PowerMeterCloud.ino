@@ -160,6 +160,7 @@ unsigned long limitMillis = 0;    //Usage Limit Timer
 unsigned long warnMillis = 0;     //Warning Timer
 unsigned long warnrMillis = 0;    //Warning Reset Timer
 unsigned long cloudMillis = 0;    //Cloud Update Timer
+unsigned long cloudsMillis = 0;   //Cloud Status Timer
 
 
 //Triggers and Conditions
@@ -214,6 +215,7 @@ int limitreset = 86400000;  //Limit Reset Time (1 Day)
 int warntimer = 5000;       //Warning Timer
 int warnreset = 60000;      //Warning Reset Time
 int cloudupdatetime = 1000; //Cloud Update Time
+int cloudstatustime = 5000; //Cloud Status Time
 
 float voltoffset = 0;     //Voltage Offset
 float curoffset = 0;      //Current Offset
@@ -281,7 +283,7 @@ void loop() {
 }
 
 void firstupdate() {
-  if (ArduinoCloud.connected() && firstcloud == 0) {
+  if (ArduinoCloud.connected()) {
     if(cvoltHigh != voltHigh) {
       voltHigh = cvoltHigh;
     }
@@ -299,7 +301,9 @@ void cloudupdatecycle() {
   if(millis() - cloudMillis > cloudupdatetime) {
     cloudMillis = millis();
     ArduinoCloud.update();
-    firstcloud();
+    if(firstcloud == 0) {
+      firstupdate();
+    }
   }
 }
 
@@ -1145,10 +1149,13 @@ void oledboot() {
 }
 
 void cloudconnection() {
-  if (ArduinoCloud.connected()) {
-    wifistat = 1;
-  } else {
-    wifistat = 0;
+  if(millis() - cloudsMillis > cloudstatustime) {
+    cloudsMillis = millis();
+    if (ArduinoCloud.connected()) {
+      wifistat = 1;
+    } else {
+      wifistat = 0;
+    }
   }
 }
 
