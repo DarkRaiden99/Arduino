@@ -351,18 +351,18 @@ int BearSSLClient::clientRead(void *ctx, unsigned char *buf, size_t len)
   }
 
 #ifdef DEBUGSERIAL
-  DEBUGSERIAL.print("BearSSLClient::clientRead - ");
-  DEBUGSERIAL.print(result);
-  DEBUGSERIAL.print(" - ");
+  //DEBUGSERIAL.print("BearSSLClient::clientRead - ");
+  //DEBUGSERIAL.print(result);
+  //DEBUGSERIAL.print(" - ");
   for (size_t i = 0; i < result; i++) {
     byte b = buf[i];
 
     if (b < 16) {
-      DEBUGSERIAL.print("0");
+      //DEBUGSERIAL.print("0");
     }
-    DEBUGSERIAL.print(b, HEX);
+    //DEBUGSERIAL.print(b, HEX);
   }
-  DEBUGSERIAL.println();
+  //DEBUGSERIAL.println();
 #endif
 
   return result;
@@ -378,18 +378,18 @@ int BearSSLClient::clientWrite(void *ctx, const unsigned char *buf, size_t len)
   }
 
 #ifdef DEBUGSERIAL
-  DEBUGSERIAL.print("BearSSLClient::clientWrite - ");
-  DEBUGSERIAL.print(len);
-  DEBUGSERIAL.print(" - ");
+  //DEBUGSERIAL.print("BearSSLClient::clientWrite - ");
+  //DEBUGSERIAL.print(len);
+  //DEBUGSERIAL.print(" - ");
   for (size_t i = 0; i < len; i++) {
     byte b = buf[i];
 
     if (b < 16) {
-      DEBUGSERIAL.print("0");
+      //DEBUGSERIAL.print("0");
     }
-    DEBUGSERIAL.print(b, HEX);
+    //DEBUGSERIAL.print(b, HEX);
   }
-  DEBUGSERIAL.println();
+  //DEBUGSERIAL.println();
 #endif
 
   if (!c->connected()) {
