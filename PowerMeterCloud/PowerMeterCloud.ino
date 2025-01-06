@@ -159,29 +159,32 @@ unsigned long settingMillis = 0;  //Setting Hold Timer
 unsigned long limitMillis = 0;    //Usage Limit Timer
 unsigned long warnMillis = 0;     //Warning Timer
 unsigned long warnrMillis = 0;    //Warning Reset Timer
+unsigned long cloudMillis = 0;    //Cloud Update Timer
+
 
 //Triggers and Conditions
-bool meter = 0;     //PZEM Connection
-bool meterw = 0;    //PZEM Connection Warning
-bool wifistat = 0;  //Wifi Connection
-bool s1 = 0;        //Left Button
-bool s1last = 0;    //Left Button Last State
-bool s2 = 0;        //Right Button
-bool s2last = 0;    //Right Button Last State
-bool dstat = 1;     //Display Status
-bool dchange = 0;   //Display Force Refresh
-bool dl = 0;        //Display Left Action
-bool dr = 0;        //Display Right Action
-bool sswitch = 0;   //Relay Trigger
-bool sswitch2 = 0;  //Relay Trigger
-bool sswitch3 = 0;  //Relay Trigger
-bool schange = 0;   //Relay Last State
-bool use = 0;       //Usage Last State
-bool h2 = 0;        //Hourly Usage Last State
-bool d2 = 0;        //Daily Usage Last State
-bool pwarn = 0;     //Warning Last State
-bool nwarn = 0;     //Warning State
-bool cwarn = 0;     //Critical Warning State
+bool meter = 0;       //PZEM Connection
+bool meterw = 0;      //PZEM Connection Warning
+bool wifistat = 0;    //Wifi Connection
+bool s1 = 0;          //Left Button
+bool s1last = 0;      //Left Button Last State
+bool s2 = 0;          //Right Button
+bool s2last = 0;      //Right Button Last State
+bool dstat = 1;       //Display Status
+bool dchange = 0;     //Display Force Refresh
+bool dl = 0;          //Display Left Action
+bool dr = 0;          //Display Right Action
+bool sswitch = 0;     //Relay Trigger
+bool sswitch2 = 0;    //Relay Trigger
+bool sswitch3 = 0;    //Relay Trigger
+bool schange = 0;     //Relay Last State
+bool use = 0;         //Usage Last State
+bool h2 = 0;          //Hourly Usage Last State
+bool d2 = 0;          //Daily Usage Last State
+bool pwarn = 0;       //Warning Last State
+bool nwarn = 0;       //Warning State
+bool cwarn = 0;       //Critical Warning State
+bool firstcloud = 0;  //Cloud First Update
 
 //Other Memories
 int dmemory [4] = {};   //Display Memory Array
@@ -210,6 +213,7 @@ int usagerefresh = 60000;   //Usage Refresh Time
 int limitreset = 86400000;  //Limit Reset Time (1 Day)
 int warntimer = 5000;       //Warning Timer
 int warnreset = 60000;      //Warning Reset Time
+int cloudupdatetime = 1000; //Cloud Update Time
 
 float voltoffset = 0;     //Voltage Offset
 float curoffset = 0;      //Current Offset
@@ -222,7 +226,6 @@ float usagelim = 0;       //Usage Limit
 float usagelimNew = 0.5;  //Usage Limit Temp
 
 void setup() {
-  // Initialize serial and wait for port to open:
   Serial.begin(9600);
 
   pinMode(BTN1, INPUT);
@@ -233,32 +236,27 @@ void setup() {
 
   bootscreen(); //Bootscreen
 
-  // This delay gives the chance to wait for a Serial Monitor without blocking if none is found
   delay(2000); 
 
-  // Defined in thingProperties.h
   initProperties();
 
   // Connect to Arduino IoT Cloud
   ArduinoCloud.begin(ArduinoIoTPreferredConnection);
   
-  /*
-     The following function allows you to obtain more information
-     related to the state of network and IoT Cloud connection and errors
-     the higher number the more granular information youâll get.
-     The default is 0 (only errors).
-     Maximum is 4
- */
   setDebugMessageLevel(2);
   ArduinoCloud.printDebugInfo();
+
+  cpowerswitch = 1;
 
   delay(1000);
 }
 
 void loop() {
-  ArduinoCloud.update();
+
+  cloudupdatecycle();
+
   cloudconnection();
-  // Your code here 
+
   s1 = digitalRead(BTN1);
   s2 = digitalRead(BTN2);
 
@@ -280,6 +278,21 @@ void loop() {
 
   delay(100);  
   
+}
+
+void firstupdate() {
+  if (ArduinoCloud.connected() && firstcloud == 0) {
+    cvoltHigh = voltHigh;
+    cvoltLow = voltLow;
+    cscreentimeout = screentimeout;
+  }
+}
+
+void cloudupdatecycle() {
+  if(millis() - cloudMillis > cloudupdatetime) {
+    cloudMillis = millis();
+    ArduinoCloud.update();
+  }
 }
 
 void button() {
@@ -520,7 +533,11 @@ void dispbody() {
       display.setTextSize(1);
       display.setTextColor(SSD1306_WHITE);
       display.setCursor(0, 16); display.print("Saved SSID:");
-      display.setCursor(0, 26); display.print("~ Not Configured");
+      if (wifistat == 1){
+        display.setCursor(12, 26); display.print(SSID);
+      } else {
+        display.setCursor(0, 26); display.print("~ Not Configured");
+      }
       display.setCursor(22, 40); display.print("Back");
       display.setCursor(74, 40); display.print("Reset");
       dispbottom();
@@ -600,7 +617,7 @@ void disptop () {
     dispwifi();
   }
   if(sswitch == 1 || sswitch2 == 1 || nwarn == 1) {
-    display.drawBitmap(120,0,warns,8,8,WHITE);
+    display.drawBitmap(106,0,warns,8,8,WHITE);
   }
 }
 
@@ -654,19 +671,21 @@ void dispmain() {
       if(schange == 0) {
         display.drawBitmap(2,16,warn,32,32,WHITE);
         display.setTextSize(1); display.setTextColor(SSD1306_WHITE);
-        if(voltHigh - voltage <= 30) {
+        if(voltHigh - voltage <= voltLow - voltage) {
           display.setCursor(56, 20); display.print("Overvoltage");
         } else {
           display.setCursor(54, 20); display.print("Undervoltage");
+          display.setCursor(68, 40); display.print(voltLow);
         }
         display.setCursor(68, 30); display.print(voltage, 2); display.print(" V");
       } else {
         display.drawBitmap(2,16,crit,32,32,WHITE);
         display.setTextSize(1); display.setTextColor(SSD1306_WHITE);
-        if(voltHigh - voltage <= 30) {
+        if(voltHigh - voltage <= voltLow - voltage) {
           display.setCursor(56, 20); display.print("Overvoltage");
         } else {
           display.setCursor(54, 20); display.print("Undervoltage");
+          display.setCursor(68, 40); display.print(voltLow);
         }
         display.setCursor(68, 22); display.print(voltage, 2); display.print(" V");
         display.setCursor(70, 34); display.print("Device");
@@ -1049,7 +1068,7 @@ void usagelimit() {
 
 void warning() {
   //User warning when voltage is close to threshold
-  if ((voltHigh - voltage < 10 && voltage < voltHigh) || (voltage - voltLow < 10 && voltage > voltLow) && schange == 0) {
+  if ((voltHigh - voltage < 5 && voltage < voltHigh) || (voltage - voltLow < 5 && voltage > voltLow) && schange == 0) {
     if (pwarn == 0 && nwarn == 0) {
       nwarn = 1;
       warnMillis = millis();
@@ -1134,16 +1153,18 @@ void cloudupdate() {
   cpF = pf;
   cfrequency = frequency;
   cpower = power;
-  cvoltHigh = voltHigh;
-  cvoltLow = voltLow;
 }
 
 void onCvoltHighChange()  {
-  // Add your code here to act upon CvoltHigh change
+  if(cvoltHigh != voltHigh) {
+    voltHigh = cvoltHigh;
+  }
 }
 
 void onCvoltLowChange()  {
-  // Add your code here to act upon CvoltLow change
+  if(cvoltLow != voltLow) {
+    voltLow = cvoltLow;
+  }
 }
 
 void onCpowerswitchChange()  {
@@ -1151,5 +1172,11 @@ void onCpowerswitchChange()  {
     sswitch3 = 0;
   } else {
     sswitch3 = 1;
+  }
+}
+
+void onCscreentimeoutChange()  {
+  if(cscreentimeout != screentimeout) {
+    screentimeout = cscreentimeout;
   }
 }
