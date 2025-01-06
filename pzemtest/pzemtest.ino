@@ -20,7 +20,7 @@ Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
  * Pin 5 Rx (Connects to the Tx pin on the PZEM)
  * Pin 4 Tx (Connects to the Rx pin on the PZEM)
 */
-PZEM004Tv30 pzem(12, 13);
+PZEM004Tv30 pzem(5, 4);
 
 void setup() {
   Serial.begin(9600);
