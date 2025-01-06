@@ -8,8 +8,8 @@
 #include <Adafruit_SSD1306.h>
 
 //Define Buttons & Relay
-#define BTN1 D6  //Left Button
-#define BTN2 D5  //Right Button
+#define BTN1 D5  //Left Button
+#define BTN2 D6  //Right Button
 #define RLY D7  //Main Relay
 
 //OLED Display Settings
@@ -240,9 +240,10 @@ void setup() {
 
   delay(2000); 
 
+  digitalWrite(RLY, HIGH);
+
   initProperties();
 
-  // Connect to Arduino IoT Cloud
   ArduinoCloud.begin(ArduinoIoTPreferredConnection);
   
   setDebugMessageLevel(2);
@@ -264,9 +265,9 @@ void loop() {
 
   button();
 
-  meterreading();
+  //meterreading();
 
-  //dummyreading();
+  dummyreading();
 
   usagememory();
 
@@ -302,7 +303,7 @@ void cloudupdatecycle() {
     cloudMillis = millis();
     ArduinoCloud.update();
     if(firstcloud == 0) {
-      firstupdate();
+      //firstupdate();
     }
   }
 }
@@ -697,9 +698,9 @@ void dispmain() {
         } else {
           display.setCursor(54, 20); display.print("Undervoltage");
         }
-        display.setCursor(68, 22); display.print(voltage, 2); display.print(" V");
-        display.setCursor(70, 34); display.print("Device");
-        display.setCursor(53, 42); display.print("Disconnected");
+        display.setCursor(68, 30); display.print(voltage, 2); display.print(" V");
+        display.setCursor(70, 40); display.print("Device");
+        display.setCursor(53, 48); display.print("Disconnected");
       }
       break;
     case 9: //No Power Supply

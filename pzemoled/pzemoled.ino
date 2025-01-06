@@ -639,9 +639,9 @@ void dispmain() {
         } else {
           display.setCursor(54, 20); display.print("Undervoltage");
         }
-        display.setCursor(68, 22); display.print(voltage, 2); display.print(" V");
-        display.setCursor(70, 34); display.print("Device");
-        display.setCursor(53, 42); display.print("Disconnected");
+        display.setCursor(68, 30); display.print(voltage, 2); display.print(" V");
+        display.setCursor(70, 40); display.print("Device");
+        display.setCursor(53, 48); display.print("Disconnected");
       }
       break;
     case 9: //No Power Supply
