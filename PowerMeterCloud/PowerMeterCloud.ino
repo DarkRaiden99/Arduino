@@ -6,6 +6,7 @@
 #include <Wire.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
+#include <SoftwareSerial.h>
 
 //Define Buttons & Relay
 #define BTN1 D5  //Left Button
@@ -20,6 +21,9 @@
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 
 PZEM004Tv30 pzem(&Serial); //PZEM Connection Pins
+
+//SoftwareSerial pzemSWSerial(3, 1);
+//PZEM004Tv30 pzem;
 
 //Bitmaps
 // boot, 128x64
@@ -204,18 +208,19 @@ float limitusage = 0;   //Limit Usage
 int dummy = 0;          //Dummy Data Memory
 
 //Timers and Threshholds (in Milliseconds)
-int screentimeout = 60000;  //Screen Timeout
-int settingHold = 5000;     //Settings Hold Time
-int resettimer = 10000;     //Screen Reset Timer
-int relaytimer = 60000;     //Relay Reset Time
-int meterrefresh = 2000;    //Meter Reading Refresh Time
-int screenrefresh = 2000;   //Screen Refresh Time
-int usagerefresh = 60000;   //Usage Refresh Time
-int limitreset = 86400000;  //Limit Reset Time (1 Day)
-int warntimer = 5000;       //Warning Timer
-int warnreset = 60000;      //Warning Reset Time
-int cloudupdatetime = 1000; //Cloud Update Time
-int cloudstatustime = 5000; //Cloud Status Time
+int screentimeout = 60000;    //Screen Timeout
+int settingHold = 5000;       //Settings Hold Time
+int resettimer = 10000;       //Screen Reset Timer
+int relaytimer = 60000;       //Relay Reset Time
+int meterrefresh = 1000;      //Meter Reading Refresh Time
+int screenrefresh = 2000;     //Screen Refresh Time
+int usagerefresh = 60000;     //Usage Refresh Time
+int limitreset = 86400000;    //Limit Reset Time (1 Day)
+int warntimer = 5000;         //Warning Timer
+int warnreset = 60000;        //Warning Reset Time
+int cloudupdatetime = 2000;   //Cloud Update Time
+int cloudupdatetime2 = 10000;  //Cloud Update Time
+int cloudstatustime = 5000;   //Cloud Status Time
 
 float voltoffset = 0;     //Voltage Offset
 float curoffset = 0;      //Current Offset
@@ -229,6 +234,8 @@ float usagelimNew = 0.5;  //Usage Limit Temp
 
 void setup() {
   Serial.begin(9600);
+
+  //pzem = PZEM004Tv30(pzemSWSerial);
 
   pinMode(BTN1, INPUT);
   pinMode(BTN2, INPUT);
@@ -244,30 +251,29 @@ void setup() {
 
   initProperties();
 
-  ArduinoCloud.begin(ArduinoIoTPreferredConnection);
+  ArduinoCloud.begin(ArduinoIoTPreferredConnection, false);
   
-  setDebugMessageLevel(2);
-  ArduinoCloud.printDebugInfo();
+  setDebugMessageLevel(0);
+  //ArduinoCloud.printDebugInfo();
 
   cpowerswitch = 1;
+  dmemory[2] = 0;
 
   delay(1000);
 }
 
 void loop() {
 
-  cloudupdatecycle();
+  meterreading();
 
-  cloudconnection();
+  cloudupdatecycle();
 
   s1 = digitalRead(BTN1);
   s2 = digitalRead(BTN2);
 
   button();
 
-  //meterreading();
-
-  dummyreading();
+  //dummyreading();
 
   usagememory();
 
@@ -299,11 +305,23 @@ void firstupdate() {
 }
 
 void cloudupdatecycle() {
-  if(millis() - cloudMillis > cloudupdatetime) {
-    cloudMillis = millis();
-    ArduinoCloud.update();
-    if(firstcloud == 0) {
-      //firstupdate();
+  if(wifistat == 0) {
+    if(millis() - cloudMillis > cloudupdatetime2) {
+      cloudMillis = millis();
+      ArduinoCloud.update();
+      cloudconnection();
+      if(firstcloud == 0) {
+        //firstupdate();
+      }
+    }
+  } else {
+    if(millis() - cloudMillis > cloudupdatetime) {
+      cloudMillis = millis();
+      ArduinoCloud.update();
+      cloudconnection();
+      if(firstcloud == 0) {
+        //firstupdate();
+      }
     }
   }
 }
@@ -1084,7 +1102,7 @@ void warning() {
       nwarn = 1;
       warnMillis = millis();
       warnrMillis = millis();
-      if(dmemory[0] == 0) {
+      if(dmemory[0] == 0 && dmemory[1] != 8) {
         dmemory[2] = dmemory[1];
         dmemory[1] = 8;
       } 
@@ -1096,7 +1114,7 @@ void warning() {
       }
     }
   } else if (schange == 1) {
-    if(dmemory[0] == 0) {
+    if(dmemory[0] == 0 && dmemory[1] != 8) {
       dmemory[2] = dmemory[1];
     }
     nwarn = 0;
