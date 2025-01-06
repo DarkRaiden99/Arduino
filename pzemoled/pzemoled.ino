@@ -205,7 +205,7 @@ int meterrefresh = 2000;    //Meter Reading Refresh Time
 int screenrefresh = 2000;   //Screen Refresh Time
 int usagerefresh = 60000;   //Usage Refresh Time
 int limitreset = 86400000;  //Limit Reset Time (1 Day)
-int warntimer = 5000;   //Warning Timer
+int warntimer = 5000;       //Warning Timer
 int warnreset = 60000;      //Warning Reset Time
 
 float voltoffset = 0;     //Voltage Offset
