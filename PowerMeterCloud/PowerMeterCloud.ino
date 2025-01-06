@@ -282,9 +282,16 @@ void loop() {
 
 void firstupdate() {
   if (ArduinoCloud.connected() && firstcloud == 0) {
-    cvoltHigh = voltHigh;
-    cvoltLow = voltLow;
-    cscreentimeout = screentimeout;
+    if(cvoltHigh != voltHigh) {
+      voltHigh = cvoltHigh;
+    }
+    if(cvoltLow != voltLow) {
+      voltLow = cvoltLow;
+    }
+    if(cscreentimeout != screentimeout) {
+      screentimeout = cscreentimeout;
+    }
+    firstcloud = 1;
   }
 }
 
@@ -292,6 +299,7 @@ void cloudupdatecycle() {
   if(millis() - cloudMillis > cloudupdatetime) {
     cloudMillis = millis();
     ArduinoCloud.update();
+    firstcloud();
   }
 }
 
@@ -671,21 +679,19 @@ void dispmain() {
       if(schange == 0) {
         display.drawBitmap(2,16,warn,32,32,WHITE);
         display.setTextSize(1); display.setTextColor(SSD1306_WHITE);
-        if(voltHigh - voltage <= voltLow - voltage) {
+        if((voltHigh - voltage) <= (voltLow - voltage)) {
           display.setCursor(56, 20); display.print("Overvoltage");
         } else {
           display.setCursor(54, 20); display.print("Undervoltage");
-          display.setCursor(68, 40); display.print(voltLow);
         }
         display.setCursor(68, 30); display.print(voltage, 2); display.print(" V");
       } else {
         display.drawBitmap(2,16,crit,32,32,WHITE);
         display.setTextSize(1); display.setTextColor(SSD1306_WHITE);
-        if(voltHigh - voltage <= voltLow - voltage) {
+        if((voltHigh - voltage) <= (voltLow - voltage)) {
           display.setCursor(56, 20); display.print("Overvoltage");
         } else {
           display.setCursor(54, 20); display.print("Undervoltage");
-          display.setCursor(68, 40); display.print(voltLow);
         }
         display.setCursor(68, 22); display.print(voltage, 2); display.print(" V");
         display.setCursor(70, 34); display.print("Device");
@@ -790,7 +796,7 @@ void relay() {
     sswitch = 0;
   }
 
-  //Toggles the relay if the according to the relay timer and Volt/Freq changes
+  //Toggles the relay
   if (sswitch == 1 || sswitch2 == 1 || sswitch3 == 1) {
     digitalWrite(RLY, LOW);
   } else {
