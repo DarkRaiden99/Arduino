@@ -3,12 +3,13 @@
 #include <ArduinoIoTCloud.h>
 #include <Arduino_ConnectionHandler.h>
 
-const char DEVICE_LOGIN_NAME[]  = "fd00f988-f7b8-4790-9c97-b94778bf2d11";
+const char DEVICE_LOGIN_NAME[]  = "b0cc8f4e-93de-4c9a-ac1b-19949d46a1ad";
 
 const char SSID[]               = SECRET_SSID;    // Network SSID (name)
 const char PASS[]               = SECRET_OPTIONAL_PASS;    // Network password (use for WPA, or use as key for WEP)
 const char DEVICE_KEY[]  = SECRET_DEVICE_KEY;    // Secret device password
 
+void onCusagelimChange();
 void onCscreentimeoutChange();
 void onCvoltHighChange();
 void onCvoltLowChange();
@@ -18,12 +19,16 @@ CloudElectricCurrent ccurrent;
 CloudElectricPotential cvoltage;
 float cenergy;
 float cpF;
+float cusagelim;
 CloudFrequency cfrequency;
 int cscreentimeout;
 int cvoltHigh;
 int cvoltLow;
 CloudPower cpower;
 bool cpowerswitch;
+bool cstatus;
+bool cvoltHight;
+bool cvoltLowt;
 
 void initProperties(){
 
@@ -33,12 +38,16 @@ void initProperties(){
   ArduinoCloud.addProperty(cvoltage, READ, ON_CHANGE, NULL);
   ArduinoCloud.addProperty(cenergy, READ, ON_CHANGE, NULL);
   ArduinoCloud.addProperty(cpF, READ, ON_CHANGE, NULL);
+  ArduinoCloud.addProperty(cusagelim, READWRITE, ON_CHANGE, onCusagelimChange);
   ArduinoCloud.addProperty(cfrequency, READ, ON_CHANGE, NULL);
   ArduinoCloud.addProperty(cscreentimeout, READWRITE, ON_CHANGE, onCscreentimeoutChange);
   ArduinoCloud.addProperty(cvoltHigh, READWRITE, ON_CHANGE, onCvoltHighChange);
   ArduinoCloud.addProperty(cvoltLow, READWRITE, ON_CHANGE, onCvoltLowChange);
   ArduinoCloud.addProperty(cpower, READ, ON_CHANGE, NULL);
   ArduinoCloud.addProperty(cpowerswitch, READWRITE, ON_CHANGE, onCpowerswitchChange);
+  ArduinoCloud.addProperty(cstatus, READ, ON_CHANGE, NULL);
+  ArduinoCloud.addProperty(cvoltHight, READ, ON_CHANGE, NULL);
+  ArduinoCloud.addProperty(cvoltLowt, READ, ON_CHANGE, NULL);
 
 }
 
