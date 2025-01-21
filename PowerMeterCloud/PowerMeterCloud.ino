@@ -164,6 +164,7 @@ unsigned long limitMillis = 0;    //Usage Limit Timer
 unsigned long warnMillis = 0;     //Warning Timer
 unsigned long warnrMillis = 0;    //Warning Reset Timer
 unsigned long cloudMillis = 0;    //Cloud Update Timer
+unsigned long cloudfMillis = 0;    //Cloud Update Timer
 unsigned long cloudsMillis = 0;   //Cloud Status Timer
 
 
@@ -220,6 +221,7 @@ int warntimer = 5000;         //Warning Timer
 int warnreset = 60000;        //Warning Reset Time
 int cloudupdatetime = 2000;   //Cloud Update Time
 int cloudupdatetime2 = 10000;  //Cloud Update Time
+int cloudupdateftime = 60000;   //Cloud First Update Time
 int cloudstatustime = 5000;   //Cloud Status Time
 
 float voltoffset = 0;     //Voltage Offset
@@ -259,6 +261,8 @@ void setup() {
   cpowerswitch = 1;
   dmemory[2] = 0;
 
+  cloudfMillis = millis();
+
   delay(1000);
 }
 
@@ -291,14 +295,17 @@ void loop() {
 
 void firstupdate() {
   if (ArduinoCloud.connected()) {
-    if(cvoltHigh != voltHigh) {
+    if(cvoltHigh != voltHigh && cvoltHigh != 0) {
       voltHigh = cvoltHigh;
     }
-    if(cvoltLow != voltLow) {
+    if(cvoltLow != voltLow && cvoltLow != 0) {
       voltLow = cvoltLow;
     }
-    if(cscreentimeout != screentimeout) {
+    if(cscreentimeout != screentimeout && cscreentimeout != 0) {
       screentimeout = cscreentimeout;
+    }
+    if(cusagelim != usagelim && cusagelim != 0) {
+      usagelim = cusagelim;
     }
     firstcloud = 1;
   }
@@ -308,10 +315,11 @@ void cloudupdatecycle() {
   if(wifistat == 0) {
     if(millis() - cloudMillis > cloudupdatetime2) {
       cloudMillis = millis();
+      cloudstatusupdate();
       ArduinoCloud.update();
       cloudconnection();
-      if(firstcloud == 0) {
-        //firstupdate();
+      if(firstcloud == 0 && millis() - cloudfMillis > cloudupdateftime) {
+        firstupdate();
       }
     }
   } else {
@@ -319,8 +327,8 @@ void cloudupdatecycle() {
       cloudMillis = millis();
       ArduinoCloud.update();
       cloudconnection();
-      if(firstcloud == 0) {
-        //firstupdate();
+      if(firstcloud == 0 && millis() - cloudfMillis > cloudupdateftime) {
+        firstupdate();
       }
     }
   }
@@ -661,7 +669,7 @@ void dispmain() {
       display.print("Power:     "); display.print(power,2); display.println(" W");
       display.print("Usage:     "); display.print(energy,3); display.println(" kWh");
       display.print("Freq.:     "); display.print(frequency,1); display.println(" Hz");
-      //display.print("PF:        "); display.print(pf,2);
+      display.print("PF:        "); display.print(pf,2);
       break;
     case 1:
       display.setTextSize(2); display.setTextColor(SSD1306_WHITE);
@@ -857,7 +865,7 @@ void meterreading() {
       pf = 0;
     }
 
-    cloudupdate(); // Cloud Update
+    cloudmeterupdate(); // Cloud Update
   }
 }
 
@@ -977,7 +985,7 @@ void dummyreading() {
         break;
     }
 
-    cloudupdate();
+    cloudmeterupdate();
   }
 }
 
@@ -1178,13 +1186,35 @@ void cloudconnection() {
   }
 }
 
-void cloudupdate() {
+void cloudmeterupdate() {
   ccurrent = current;
   cvoltage = voltage;
   cenergy = energy;
   cpF = pf;
   cfrequency = frequency;
   cpower = power;
+}
+
+void cloudstatusupdate() {
+  if(sswitch = 1) {
+    cstatus = 0;
+    cstatus3 = 0;
+  } else {
+    cstatus = 1;
+    cstatus3 = 1;
+  }
+  if(sswitch2 = 1) {
+    cstatus2 = 0;
+    cstatus3 = 0;
+  } else {
+    cstatus2 = 1;
+    cstatus3 = 1;
+  }
+  if(sswitch3 = 1) {
+    cstatus3 = 0;
+  } else {
+    cstatus3 = 1;
+  }
 }
 
 void onCvoltHighChange()  {
@@ -1210,5 +1240,11 @@ void onCpowerswitchChange()  {
 void onCscreentimeoutChange()  {
   if(cscreentimeout != screentimeout) {
     screentimeout = cscreentimeout;
+  }
+}
+
+void onCusagelimChange()  {
+  if(cusagelim != usagelim) {
+    usagelim = cusagelim;
   }
 }

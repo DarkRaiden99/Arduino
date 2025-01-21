@@ -27,6 +27,8 @@ int cvoltLow;
 CloudPower cpower;
 bool cpowerswitch;
 bool cstatus;
+bool cstatus2;
+bool cstatus3;
 bool cvoltHight;
 bool cvoltLowt;
 
@@ -46,6 +48,8 @@ void initProperties(){
   ArduinoCloud.addProperty(cpower, READ, ON_CHANGE, NULL);
   ArduinoCloud.addProperty(cpowerswitch, READWRITE, ON_CHANGE, onCpowerswitchChange);
   ArduinoCloud.addProperty(cstatus, READ, ON_CHANGE, NULL);
+  ArduinoCloud.addProperty(cstatus2, READ, ON_CHANGE, NULL);
+  ArduinoCloud.addProperty(cstatus3, READ, ON_CHANGE, NULL);
   ArduinoCloud.addProperty(cvoltHight, READ, ON_CHANGE, NULL);
   ArduinoCloud.addProperty(cvoltLowt, READ, ON_CHANGE, NULL);
 
