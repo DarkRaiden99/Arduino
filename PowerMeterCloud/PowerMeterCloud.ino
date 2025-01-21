@@ -268,7 +268,7 @@ void setup() {
 
 void loop() {
 
-  meterreading();
+  //meterreading();
 
   cloudupdatecycle();
 
@@ -277,7 +277,7 @@ void loop() {
 
   button();
 
-  //dummyreading();
+  dummyreading();
 
   usagememory();
 
@@ -325,6 +325,7 @@ void cloudupdatecycle() {
   } else {
     if(millis() - cloudMillis > cloudupdatetime) {
       cloudMillis = millis();
+      cloudstatusupdate();
       ArduinoCloud.update();
       cloudconnection();
       if(firstcloud == 0 && millis() - cloudfMillis > cloudupdateftime) {
@@ -1197,20 +1198,16 @@ void cloudmeterupdate() {
 
 void cloudstatusupdate() {
   if(sswitch == 1) {
-    cstatus = 0;
-    cstatus3 = 0;
-  } else {
     cstatus = 1;
-    cstatus3 = 1;
+  } else {
+    cstatus = 0;
   }
   if(sswitch2 == 1) {
-    cstatus2 = 0;
-    cstatus3 = 0;
-  } else {
     cstatus2 = 1;
-    cstatus3 = 1;
+  } else {
+    cstatus2 = 0;
   }
-  if(sswitch3 == 1) {
+  if(sswitch == 1 || sswitch2 == 1 || sswitch3 == 1) {
     cstatus3 = 0;
   } else {
     cstatus3 = 1;
