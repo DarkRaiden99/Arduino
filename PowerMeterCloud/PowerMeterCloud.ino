@@ -1196,21 +1196,21 @@ void cloudmeterupdate() {
 }
 
 void cloudstatusupdate() {
-  if(sswitch = 1) {
+  if(sswitch == 1) {
     cstatus = 0;
     cstatus3 = 0;
   } else {
     cstatus = 1;
     cstatus3 = 1;
   }
-  if(sswitch2 = 1) {
+  if(sswitch2 == 1) {
     cstatus2 = 0;
     cstatus3 = 0;
   } else {
     cstatus2 = 1;
     cstatus3 = 1;
   }
-  if(sswitch3 = 1) {
+  if(sswitch3 == 1) {
     cstatus3 = 0;
   } else {
     cstatus3 = 1;
@@ -1230,10 +1230,10 @@ void onCvoltLowChange()  {
 }
 
 void onCpowerswitchChange()  {
-  if (cpowerswitch == 1) {
-    sswitch3 = 0;
-  } else {
+  if (cpowerswitch == 0) {
     sswitch3 = 1;
+  } else {
+    sswitch3 = 0;
   }
 }
 
