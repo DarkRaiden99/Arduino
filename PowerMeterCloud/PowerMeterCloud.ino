@@ -325,6 +325,7 @@ void cloudupdatecycle() {
   } else {
     if(millis() - cloudMillis > cloudupdatetime) {
       cloudMillis = millis();
+      cloudstatusupdate();
       ArduinoCloud.update();
       cloudconnection();
       if(firstcloud == 0 && millis() - cloudfMillis > cloudupdateftime) {
@@ -1200,12 +1201,21 @@ void cloudstatusupdate() {
     cstatus = 1;
   } else {
     cstatus = 0;
+<<<<<<< HEAD
   }
   if (sswitch2 == 1) {
     cstatus2 = 1;
   } else {
     cstatus2 = 0;
   }
+=======
+  }
+  if(sswitch2 == 1) {
+    cstatus2 = 1;
+  } else {
+    cstatus2 = 0;
+  }
+>>>>>>> da212181d47f0ab62b742138d07b2688ff7f8b4e
   if(sswitch == 1 || sswitch2 == 1 || sswitch3 == 1) {
     cstatus3 = 0;
   } else {
