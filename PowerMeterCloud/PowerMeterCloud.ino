@@ -268,7 +268,7 @@ void setup() {
 
 void loop() {
 
-  //meterreading();
+  meterreading();
 
   cloudupdatecycle();
 
@@ -277,7 +277,7 @@ void loop() {
 
   button();
 
-  dummyreading();
+  //dummyreading();
 
   usagememory();
 
